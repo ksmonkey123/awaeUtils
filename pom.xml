@@ -2,13 +2,37 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
+	<parent>
+		<groupId>org.sonatype.oss</groupId>
+		<artifactId>oss-parent</artifactId>
+		<version>9</version>
+	</parent>
+
 	<groupId>ch.awae</groupId>
 	<artifactId>awaeUtils</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1</version>
 	<packaging>jar</packaging>
 
-	<name>awaeUtils</name>
-	<url>http://maven.apache.org</url>
+	<name>ch.awae.awaeUtils</name>
+	<url>http://www.awae.ch</url>
+
+	<developers>
+		<developer>
+			<name>Andreas Wälchli</name>
+			<url>http://www.awae.ch</url>
+			<email>andreas.waelchli@me.com</email>
+		</developer>
+	</developers>
+
+	<scm>
+		<url>git@github.com:ksmonkey123/awaeUtils.git</url>
+	</scm>
+	<licenses>
+		<license>
+			<name>MIT License</name>
+			<url>http://www.opensource.org/licenses/mit-license.php</url>
+		</license>
+	</licenses>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -44,11 +68,29 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>2.7</version>
+				<configuration>
+					<additionalparam>-Xdoclint:none</additionalparam>
+					<javadocExecutable>${java.home}/../bin/javadoc</javadocExecutable>
+				</configuration>
 				<executions>
 					<execution>
 						<id>attach-javadocs</id>
 						<goals>
 							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-gpg-plugin</artifactId>
+				<version>1.6</version>
+				<executions>
+					<execution>
+						<id>sign-artifacts</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>sign</goal>
 						</goals>
 					</execution>
 				</executions>
@@ -62,11 +104,6 @@
 			<artifactId>junit</artifactId>
 			<version>4.12</version>
 			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.github.lukehutch</groupId>
-			<artifactId>fast-classpath-scanner</artifactId>
-			<version>LATEST</version>
 		</dependency>
 	</dependencies>
 
