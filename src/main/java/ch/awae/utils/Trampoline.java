@@ -31,7 +31,7 @@ public final class Trampoline {
 
 	public static abstract class Result<T> {
 
-		Result() {
+		private Result() {
 		}
 
 		boolean isReturn() {
@@ -46,33 +46,23 @@ public final class Trampoline {
 
 	}
 
-	private static class TrampolineValue<T> extends Result<T> {
-
-		private final T value;
-
-		TrampolineValue(T value) {
-			this.value = value;
-		}
-
-		@Override
-		public boolean isReturn() {
-			return true;
-		}
-
-		@Override
-		public T get() {
-			return this.value;
-		}
-
-		@Override
-		public Result<T> call() {
-			throw new UnsupportedOperationException();
-		}
-
-	}
-
 	public static <T> Result<T> result(T value) {
-		return new TrampolineValue<T>(value);
+		return new Result<T>() {
+			@Override
+			boolean isReturn() {
+				return true;
+			}
+
+			@Override
+			T get() {
+				return value;
+			}
+
+			@Override
+			public Result<T> call() {
+				throw new UnsupportedOperationException();
+			}
+		};
 	}
 
 	public static <T> Result<T> bounce(Supplier<Result<T>> f) {
