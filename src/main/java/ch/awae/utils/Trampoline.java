@@ -1,3 +1,6 @@
+/*
+ * Copyright (c) 2016 Andreas Wälchli
+ */
 package ch.awae.utils;
 
 import java.util.function.BiFunction;
@@ -26,9 +29,13 @@ import java.util.function.Supplier;
  * using {@link Trampoline#result} or they can be wrapped into a
  * {@link Trampoline.Result} using {@link Trampoline#bounceWrapped}.
  * </p>
+ * 
+ * @author Andreas Wälchli (andreas.waelchli@me.com)
+ * @version 1.1
+ * @since awaeUtils 0.0.1
  */
 public final class Trampoline {
-
+	
 	public static abstract class Result<T> {
 
 		private Result() {
