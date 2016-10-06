@@ -48,12 +48,17 @@ public final class Trampoline {
 	 * @since awaeUtils 0.0.1
 	 * @param <T>
 	 *            the return type
-	 * @deprecated this class will be rewritten. <b>DO NOT EXTEND!</b>
 	 */
-	@Deprecated
-	public static abstract class Result<T> {
+	public static final class Result<T> {
 
-		private Result() {
+		private final boolean isValue;
+		private final T value;
+		private final Supplier<Result<T>> supplier;
+
+		private Result(final boolean isValue, final T value, final Supplier<Result<T>> supplier) {
+			this.isValue = isValue;
+			this.value = isValue ? value : null;
+			this.supplier = isValue ? null : supplier;
 		}
 
 		/**
@@ -61,8 +66,8 @@ public final class Trampoline {
 		 * 
 		 * @return {@code true} if the Result is a return value.
 		 */
-		boolean isReturn() {
-			return false;
+		final private boolean isReturn() {
+			return this.isValue;
 		}
 
 		/**
@@ -72,7 +77,9 @@ public final class Trampoline {
 		 * @throws UnsupportedOperationException
 		 *             if this result does not represent a return value.
 		 */
-		T get() {
+		final private T get() {
+			if (this.isValue)
+				return this.value;
 			throw new UnsupportedOperationException();
 		}
 
@@ -84,9 +91,17 @@ public final class Trampoline {
 		 * @throws UnsupportedOperationException
 		 *             if the Result is a return value.
 		 */
-		abstract Result<T> call();
+		final private Result<T> call() {
+			if (this.isValue)
+				throw new UnsupportedOperationException();
+			return this.supplier.get();
+		}
 
 	}
+
+	// ==================
+	// TRAMPOLINE METHODS
+	// ==================
 
 	/**
 	 * Wraps a value into a Result instance representing that value
@@ -96,22 +111,7 @@ public final class Trampoline {
 	 * @return the Result containing the {@code value}
 	 */
 	public static <T> Result<T> result(T value) {
-		return new Result<T>() {
-			@Override
-			boolean isReturn() {
-				return true;
-			}
-
-			@Override
-			T get() {
-				return value;
-			}
-
-			@Override
-			public Result<T> call() {
-				throw new UnsupportedOperationException();
-			}
-		};
+		return new Result<T>(true, value, null);
 	}
 
 	/**
@@ -124,14 +124,7 @@ public final class Trampoline {
 	 *         of that call determines the next trampoline action.
 	 */
 	public static <T> Result<T> bounce(Supplier<Result<T>> f) {
-		return new Result<T>() {
-
-			@Override
-			Result<T> call() {
-				return f.get();
-			}
-
-		};
+		return new Result<T>(false, null, f);
 	}
 
 	/**
@@ -147,13 +140,7 @@ public final class Trampoline {
 	 *         determines the next trampoline action.
 	 */
 	public static <T, A> Result<T> bounce(Function<A, Result<T>> f, A param0) {
-		return new Result<T>() {
-
-			@Override
-			Result<T> call() {
-				return f.apply(param0);
-			}
-		};
+		return new Result<T>(false, null, () -> f.apply(param0));
 	}
 
 	/**
@@ -171,12 +158,7 @@ public final class Trampoline {
 	 *         that call determines the next trampoline action.
 	 */
 	public static <T, A, B> Result<T> bounce(BiFunction<A, B, Result<T>> f, A param0, B param1) {
-		return new Result<T>() {
-			@Override
-			Result<T> call() {
-				return f.apply(param0, param1);
-			}
-		};
+		return new Result<T>(false, null, () -> f.apply(param0, param1));
 	}
 
 	/**
@@ -196,14 +178,7 @@ public final class Trampoline {
 	 *         trampoline.
 	 */
 	public static <T> Result<T> bounceWrapped(Supplier<T> f) {
-		return new Result<T>() {
-
-			@Override
-			Result<T> call() {
-				return result(f.get());
-			}
-
-		};
+		return new Result<T>(false, null, () -> result(f.get()));
 	}
 
 	/**
@@ -225,14 +200,7 @@ public final class Trampoline {
 	 *         wrapped into a Result and returned to the trampoline.
 	 */
 	public static <T, A> Result<T> bounceWrapped(Function<A, T> f, A param0) {
-		return new Result<T>() {
-
-			@Override
-			Result<T> call() {
-				return result(f.apply(param0));
-			}
-
-		};
+		return new Result<T>(false, null, () -> result(f.apply(param0)));
 	}
 
 	/**
@@ -257,14 +225,7 @@ public final class Trampoline {
 	 *         trampoline.
 	 */
 	public static <T, A, B> Result<T> bounceWrapped(BiFunction<A, B, T> f, A param0, B param1) {
-		return new Result<T>() {
-
-			@Override
-			Result<T> call() {
-				return result(f.apply(param0, param1));
-			}
-
-		};
+		return new Result<T>(false, null, () -> result(f.apply(param0, param1)));
 	}
 
 	/**
