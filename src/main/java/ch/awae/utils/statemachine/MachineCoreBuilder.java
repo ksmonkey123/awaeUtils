@@ -2,6 +2,7 @@ package ch.awae.utils.statemachine;
 
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * Builder for constructing state machine cores. multiple of these builders can
@@ -21,7 +22,7 @@ import java.util.Objects;
  * 
  * @author Andreas Wälchli
  * @since awaeUtils 0.0.3
- * @version 1.2 (0.0.4)
+ * @version 1.3 (0.0.4)
  * 
  * @see StateMachine
  * @see StateMachineBuilder
@@ -111,6 +112,68 @@ public final class MachineCoreBuilder {
         synchronized (LOCK) {
             transitions.add(transition);
         }
+        return this;
+    }
+
+    /**
+     * Adds a sequence of state transitions with anonymous states for the
+     * intermediate steps. The triggered events and commands will all be added
+     * to the last transition in the sequence.
+     * 
+     * @param from
+     *            the state the transition originates from. may not be
+     *            {@code null}
+     * @param sequence
+     *            the sequence of events that triggers the transitions. may not
+     *            be {@code null} and must have at least one item.
+     * @param to
+     *            the state the transition leads to. may be identical to
+     *            {@code from}. may not be {@code null}
+     * @param events
+     *            an array of all events that shall be triggered by the
+     *            transition. may be {@code null}. no element may be
+     *            {@code null}
+     * @param commands
+     *            an array of all commands that shall be triggered by the
+     *            transition. may be {@code null}. no element may be
+     *            {@code null}
+     * @return the builder itself
+     * @throws NullPointerException
+     *             if any {@code String} parameter or any array element is
+     *             {@code null}
+     * @throws IllegalArgumentException
+     *             the sequence is empty
+     * @since 1.3 (0.0.5)
+     */
+    public MachineCoreBuilder addSequence(String from, String[] sequence, String to, String[] events,
+            String[] commands) {
+        // recursive resolution of null arrays
+        if (events == null)
+            return addSequence(from, sequence, to, new String[0], commands);
+        if (commands == null)
+            return addSequence(from, sequence, to, events, new String[0]);
+
+        // preliminary input validation
+        Objects.requireNonNull(from, "'from' may not be null");
+        Objects.requireNonNull(sequence, "'seqence' may not be null");
+        Objects.requireNonNull(commands, "'commands' may not be null");
+        if (sequence.length == 0)
+            throw new IllegalArgumentException("empty sequence is not allowed");
+        for (int i = 0; i < sequence.length; i++)
+            Objects.requireNonNull(sequence[i], "'sequence[" + i + "]' may not be null");
+        // sequence of length 1 is just a transition
+        if (sequence.length == 1)
+            return addTransition(from, sequence[0], to, events, commands);
+        // build sequence
+        String state = from;
+        for (int i = 0; i < sequence.length - 1; i++) {
+            // intermediate state
+            String uuid = UUID.randomUUID().toString();
+            addTransition(state, sequence[i], uuid, null, null);
+            state = uuid;
+        }
+        // build last transition
+        addTransition(state, sequence[sequence.length - 1], to, events, commands);
         return this;
     }
 
