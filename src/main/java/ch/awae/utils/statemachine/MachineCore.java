@@ -26,7 +26,7 @@ final class MachineCore {
                 temp = this.map.get(transition.origin);
             else {
                 temp = new HashMap<>();
-                this.map.put(transition.event, temp);
+                this.map.put(transition.origin, temp);
             }
             // register transition
             if (temp.containsKey(transition.event))

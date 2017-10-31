@@ -37,6 +37,7 @@ import java.util.concurrent.BlockingQueue;
  * 
  * @author Andreas Wälchli
  * @since awaeUtils 0.0.3
+ * @version 1.1
  */
 public interface StateMachine {
 
