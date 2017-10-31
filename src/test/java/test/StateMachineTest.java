@@ -23,6 +23,8 @@ public class StateMachineTest {
 
         StateMachine machine = builder.build();
 
+        System.out.println(machine.extractDiagram());
+
         Thread t = new Thread(() -> {
             while (!Thread.interrupted())
                 try {

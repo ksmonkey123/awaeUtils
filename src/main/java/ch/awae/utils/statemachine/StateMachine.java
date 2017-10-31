@@ -85,4 +85,11 @@ public interface StateMachine {
      */
     void reset();
 
+    /**
+     * Creates a graphviz (dot) compatible graph from the state machine.
+     * 
+     * @return a dot graph string
+     */
+    String extractDiagram();
+
 }

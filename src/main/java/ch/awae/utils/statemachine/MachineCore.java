@@ -62,4 +62,19 @@ final class MachineCore {
         this.currentState = this.initialState;
     }
 
+    String graphSection(int index) {
+        StringBuilder builder = new StringBuilder();
+        // initial node
+        builder.append("\"" + index + "." + initialState + "\" [peripheries=2]\n");
+        // all transitions
+        for (HashMap<String, Transition> map : this.map.values()) {
+            for (Transition t : map.values()) {
+                builder.append("\"" + index + "." + t.origin + "\" -> \"" + index + "." + t.target + "\" [label=\""
+                        + t.event + "\"]\n");
+            }
+        }
+        // finish
+        return builder.toString();
+    }
+
 }

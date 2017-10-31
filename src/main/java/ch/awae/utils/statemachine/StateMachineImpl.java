@@ -11,9 +11,8 @@ final class StateMachineImpl implements StateMachine {
     private final BlockingQueue<String> eventQueue;
     private final BlockingQueue<String> commandQueue;
 
-    private final Object LOCK = new Object();
-
-    private Thread worker = null;
+    private final Object LOCK   = new Object();
+    private Thread       worker = null;
 
     StateMachineImpl(MachineCore... cores) {
         // load cores
@@ -62,7 +61,6 @@ final class StateMachineImpl implements StateMachine {
                     interrupted = true;
                 }
             }
-            // cleanup
             worker = null;
             // re-apply interrupt
             if (interrupted)
@@ -107,6 +105,22 @@ final class StateMachineImpl implements StateMachine {
         } catch (InterruptedException e) {
             return;
         }
+    }
+
+    @Override
+    public String extractDiagram() {
+        StringBuilder builder = new StringBuilder();
+        final char br = '\n';
+        // header
+        builder.append("digraph {" + br);
+        // all cores
+        for (int i = 0; i < cores.length; i++) {
+            // build core
+            builder.append(cores[i].graphSection(i));
+        }
+        // finish
+        builder.append("}");
+        return builder.toString();
     }
 
 }
