@@ -59,32 +59,40 @@ public final class MachineCoreBuilder {
     }
 
     /**
-     * Adds a new transition between two states. All parameters and all elements
-     * of the arrays are required to be non-null.
+     * Adds a new transition between two states.
      * 
      * @param from
-     *            the state the transition originates from
+     *            the state the transition originates from. may not be
+     *            {@code null}
      * @param event
-     *            the event that triggers the transition
+     *            the event that triggers the transition. may not be
+     *            {@code null}
      * @param to
      *            the state the transition leads to. may be identical to
-     *            {@code from}
+     *            {@code from}. may not be {@code null}
      * @param events
      *            an array of all events that shall be triggered by the
-     *            transition
+     *            transition. may be {@code null}. no element may be
+     *            {@code null}
      * @param commands
      *            an array of all commands that shall be triggered by the
-     *            transition
+     *            transition. may be {@code null}. no element may be
+     *            {@code null}
      * @return the builder itself
      * @throws NullPointerException
-     *             if any parameter or any array element is {@code null}
+     *             if any {@code String} parameter or any array element is
+     *             {@code null}
      */
     public MachineCoreBuilder addTransition(String from, String event, String to, String[] events, String[] commands) {
+        // recursive resolution of null arrays
+        if (events == null)
+            return addTransition(from, event, to, new String[0], commands);
+        if (commands == null)
+            return addTransition(from, event, to, events, new String[0]);
+
         // preliminary input validation
         Objects.requireNonNull(from, "'from' may not be null");
         Objects.requireNonNull(event, "'event' may not be null");
-        Objects.requireNonNull(to, "'to' may not be null");
-        Objects.requireNonNull(events, "'events' may not be null");
         Objects.requireNonNull(commands, "'commands' may not be null");
 
         // construct command array

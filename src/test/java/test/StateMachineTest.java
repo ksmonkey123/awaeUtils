@@ -13,8 +13,8 @@ public class StateMachineTest {
         b1.setInitialState("a");
 
         MachineCoreBuilder b2 = new MachineCoreBuilder();
-        b2.addTransition("c", "3", "d", new String[0], new String[] { "c -> d" });
-        b2.addTransition("d", "4", "c", new String[0], new String[] { "d -> c" });
+        b2.addTransition("c", "3", "d", null, new String[] { "c -> d" });
+        b2.addTransition("d", "4", "c", null, new String[] { "d -> c" });
         b2.setInitialState("c");
 
         StateMachineBuilder builder = new StateMachineBuilder();
