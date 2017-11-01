@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 /**
  * Builder for constructing state machine cores. multiple of these builders can
@@ -30,8 +31,9 @@ import java.util.UUID;
  */
 public final class MachineCoreBuilder {
 
-    private ArrayList<Transition> transitions  = new ArrayList<>();
-    private String                initialState = null;
+    private ArrayList<Transition> transitions   = new ArrayList<>();
+    private String                initialState  = null;
+    private boolean               allowTerminal = false;
 
     private final Object LOCK = new Object();
 
@@ -55,6 +57,7 @@ public final class MachineCoreBuilder {
         Objects.requireNonNull(builder);
         // copy data
         initialState = builder.initialState;
+        allowTerminal = builder.allowTerminal;
         synchronized (builder.LOCK) {
             transitions.addAll(builder.transitions);
         }
@@ -113,6 +116,21 @@ public final class MachineCoreBuilder {
         synchronized (LOCK) {
             transitions.add(transition);
         }
+        return this;
+    }
+
+    /**
+     * define if terminal states are allowed. terminal states without any
+     * transitions leaving them. By default terminal states are not allowed.
+     * 
+     * @param allow
+     *            {@code true} if terminal states should be allowed
+     * @return the builder itself
+     * 
+     * @since 1.4
+     */
+    public MachineCoreBuilder setAllowTerminalStates(boolean allow) {
+        this.allowTerminal = allow;
         return this;
     }
 
@@ -299,9 +317,10 @@ public final class MachineCoreBuilder {
         return new MachineCoreBuilder(this);
     }
 
-    MachineCore build() {
+    MachineCore build(int id, String logname, Logger logger) {
         synchronized (LOCK) {
-            return new MachineCore(initialState, transitions.toArray(new Transition[0]));
+            return new MachineCore(id, logname, logger, !allowTerminal, initialState,
+                    transitions.toArray(new Transition[0]));
         }
     }
 
