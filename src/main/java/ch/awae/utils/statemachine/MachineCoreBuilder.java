@@ -7,19 +7,74 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 /**
- * Builder for constructing state machine cores. multiple of these builders can
+ * Builder for constructing state machine cores. Multiple of these builders can
  * be combined in a {@link StateMachineBuilder} to construct a state machine.
  * 
  * <p>
  * A machine core describes a single state machine with exactly one active state
  * at any time. Multiple cores can be combined into a {@link StateMachine} at
  * which point they are combined into a state machine cluster with common event
- * and command queues.
+ * and command queues. The builder does perform some preliminary data validation
+ * on every mutation. A full data validation is performed by the
+ * {@link StateMachineBuilder} whenever a core is added.
+ * </p>
+ * <h3>Machine Core construction</h3>
+ * <p>
+ * A machine core is constructed by defining a list of transitions. From these
+ * transitions the states are extracted automatically. Transitions can be added
+ * by calling
+ * {@link #addTransition(String, String, String, String[], String[])}. Every
+ * machine core requires an initial state to be defined. That is the state the
+ * machine core starts in and is reverted to whenever a state machine is reset
+ * using {@link StateMachine#reset()}. This initial state can be set through
+ * {@link #setInitialState(String)}.
+ * </p>
+ * <h4>Helper Methods</h4>
+ * <p>
+ * The method {@link #addSequence(String, String[], String, String[], String[])}
+ * allows for easy definition of a <em>transition sequence</em>, i.e. an ordered
+ * list of events that - if occurring in that sequence - result in a given
+ * transition. The intermediate states are generated internally and are expected
+ * to be unique (the state names are derived from random {@link UUID}'s).
  * </p>
  * <p>
- * The builder does perform some preliminary data validation on every mutation.
- * A full data validation is performed by the {@link StateMachineBuilder}
- * whenever a core is added.
+ * The method
+ * {@link #addArbitrarySequence(String, String[], String, String[], String[])}
+ * allows for easy definition of a set of transitions for a given unordered list
+ * of events. The resulting transitions represent a system where all events in
+ * the given list must occur in any order to result in a given transition. The
+ * resulting system grows very quickly with the number of events in the list. It
+ * is recommended to avoid exceeding 4-5 entries as otherwise many thousands of
+ * states may be created.
+ * </p>
+ * <p>
+ * The method {@link #addFunnel(String[], String, String, String[], String[])}
+ * allows for easy definition of the same transition from multiple origins to a
+ * single target state. This is very useful if there are multiple states that
+ * should respond to a given event identically. If combined with the
+ * {@link #addSequence(String, String[], String, String[], String[])} method
+ * this can for example be used to create "reset" transitions for each
+ * intermediate state in the sequence.
+ * </p>
+ * <h3>Terminal State Checking</h3>
+ * <p>
+ * By default during creation each core validates that there are no terminal
+ * states (i.e. states that have no transitions leaving them). Often terminal
+ * states are not desired as most state machines should be able (by some
+ * sequence of events) to return to a prior well-defined state (e.g. a default
+ * "idle" state). In these scenarios terminal states are an indicator of a
+ * programming error and are therefore checked for. This checks can however be
+ * very expensive as the target states of all transitions must be checked. If
+ * terminal states are actually needed, the check strictness can be reduced by
+ * calling {@link #setAllowTerminalStates(boolean)
+ * setAllowTerminalStates(true)}. This will still perform the check but only
+ * produce warnings for terminal states and not an exception. If the performance
+ * requirements require it the terminal state check can be disabled completely
+ * by calling {@link #setCheckForTerminalStates(boolean)
+ * setCheckForTerminalStates(false)}. It is recommended to keep the terminal
+ * state check enabled whenever possible but at least for testing. If all
+ * "legal" terminal states are known the check still allows for easy detection
+ * of unwanted terminal states.
  * </p>
  * 
  * @author Andreas Wälchli
@@ -34,6 +89,7 @@ public final class MachineCoreBuilder {
     private ArrayList<Transition> transitions   = new ArrayList<>();
     private String                initialState  = null;
     private boolean               allowTerminal = false;
+    private boolean               checkTerminal = true;
 
     private final Object LOCK = new Object();
 
@@ -56,11 +112,26 @@ public final class MachineCoreBuilder {
     public MachineCoreBuilder(MachineCoreBuilder builder) {
         Objects.requireNonNull(builder);
         // copy data
+        checkTerminal = builder.checkTerminal;
         initialState = builder.initialState;
         allowTerminal = builder.allowTerminal;
         synchronized (builder.LOCK) {
             transitions.addAll(builder.transitions);
         }
+    }
+
+    /**
+     * Defines if the core should be checked for terminal states during
+     * creation. This check may be very expensive. By default it is enabled.
+     * 
+     * @param check
+     *            {@code true} if the check should be done.
+     * @returns the builder itself
+     * @since 1.4 (0.0.5)
+     */
+    public MachineCoreBuilder setCheckForTerminalStates(boolean check) {
+        checkTerminal = check;
+        return this;
     }
 
     /**
@@ -120,6 +191,70 @@ public final class MachineCoreBuilder {
     }
 
     /**
+     * Adds a new transition from all the origin states to a single target state
+     * essentially funnelling the state flow.
+     * 
+     * @param from
+     *            the states the transitions originate from. may not be
+     *            {@code null} or contain {@code null} elements
+     * @param event
+     *            the event that triggers the transition. may not be
+     *            {@code null}
+     * @param to
+     *            the state the transition leads to. may be identical to
+     *            {@code from}. may not be {@code null}
+     * @param events
+     *            an array of all events that shall be triggered by the
+     *            transition. may be {@code null}. no element may be
+     *            {@code null}
+     * @param commands
+     *            an array of all commands that shall be triggered by the
+     *            transition. may be {@code null}. no element may be
+     *            {@code null}
+     * @return the builder itself
+     * @throws NullPointerException
+     *             if any {@code String} parameter or any array element is
+     *             {@code null}
+     * @since 1.4 (0.0.5)
+     */
+    public MachineCoreBuilder addFunnel(String[] from, String event, String to, String[] events, String[] commands) {
+        // recursive resolution of null arrays
+        if (events == null)
+            return addFunnel(from, event, to, new String[0], commands);
+        if (commands == null)
+            return addFunnel(from, event, to, events, new String[0]);
+
+        // preliminary input validation
+        Objects.requireNonNull(from, "'from' may not be null");
+        Objects.requireNonNull(event, "'event' may not be null");
+        Objects.requireNonNull(commands, "'commands' may not be null");
+        if (from.length == 0)
+            throw new IllegalArgumentException("empty 'from' array is not allowed");
+        for (int i = 0; i < from.length; i++)
+            Objects.requireNonNull(from[i], "'from[" + i + "]' may not be null");
+
+        // construct command array
+        Command[] cmds = new Command[events.length + commands.length];
+
+        for (int i = 0; i < events.length; i++)
+            cmds[i] = new Command(CommandType.EVENT,
+                    Objects.requireNonNull(events[i], "'events[" + i + "]' may not be null"));
+
+        for (int i = 0; i < commands.length; i++)
+            cmds[i + events.length] = new Command(CommandType.COMMAND,
+                    Objects.requireNonNull(commands[i], "'commands[" + i + "]' may not be null"));
+
+        // add transition
+        for (String state : from) {
+            Transition transition = new Transition(state, event, to, cmds);
+            synchronized (LOCK) {
+                transitions.add(transition);
+            }
+        }
+        return this;
+    }
+
+    /**
      * define if terminal states are allowed. terminal states without any
      * transitions leaving them. By default terminal states are not allowed.
      * 
@@ -156,7 +291,8 @@ public final class MachineCoreBuilder {
      *            an array of all commands that shall be triggered by the
      *            transition. may be {@code null}. no element may be
      *            {@code null}
-     * @return the builder itself
+     * @return an ordered list of all intermediate states or an empty array if
+     *         no intermediate states exist
      * @throws NullPointerException
      *             if any {@code String} parameter or any array element is
      *             {@code null}
@@ -164,8 +300,7 @@ public final class MachineCoreBuilder {
      *             the sequence is empty
      * @since 1.3 (0.0.5)
      */
-    public MachineCoreBuilder addSequence(String from, String[] sequence, String to, String[] events,
-            String[] commands) {
+    public String[] addSequence(String from, String[] sequence, String to, String[] events, String[] commands) {
         // recursive resolution of null arrays
         if (events == null)
             return addSequence(from, sequence, to, new String[0], commands);
@@ -181,19 +316,23 @@ public final class MachineCoreBuilder {
         for (int i = 0; i < sequence.length; i++)
             Objects.requireNonNull(sequence[i], "'sequence[" + i + "]' may not be null");
         // sequence of length 1 is just a transition
-        if (sequence.length == 1)
-            return addTransition(from, sequence[0], to, events, commands);
+        if (sequence.length == 1) {
+            addTransition(from, sequence[0], to, events, commands);
+            return new String[0];
+        }
         // build sequence
+        String[] states = new String[sequence.length - 1];
         String state = from;
         for (int i = 0; i < sequence.length - 1; i++) {
             // intermediate state
             String uuid = UUID.randomUUID().toString();
             addTransition(state, sequence[i], uuid, null, null);
             state = uuid;
+            states[i] = state;
         }
         // build last transition
         addTransition(state, sequence[sequence.length - 1], to, events, commands);
-        return this;
+        return states;
     }
 
     /**
@@ -319,7 +458,7 @@ public final class MachineCoreBuilder {
 
     MachineCore build(int id, String logname, Logger logger) {
         synchronized (LOCK) {
-            return new MachineCore(id, logname, logger, !allowTerminal, initialState,
+            return new MachineCore(id, logname, logger, !allowTerminal, checkTerminal, initialState,
                     transitions.toArray(new Transition[0]));
         }
     }

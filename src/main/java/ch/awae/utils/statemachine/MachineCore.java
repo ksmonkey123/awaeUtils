@@ -18,11 +18,14 @@ final class MachineCore {
     private final String  prefix;
     private final int     transitionCount;
     private final boolean strict;
+    private final boolean checked;
     private final int     coreID;
 
-    MachineCore(int id, String logtitle, Logger logger, boolean strict, String initial, Transition... transitions) {
+    MachineCore(int id, String logtitle, Logger logger, boolean strict, boolean checked, String initial,
+            Transition... transitions) {
         prefix = logtitle + ": ";
         this.strict = strict;
+        this.checked = checked;
         coreID = id;
         this.logger = Objects.requireNonNull(logger, "logger may not be null");
         this.initialState = Objects.requireNonNull(initial, "initial may not be null");
@@ -54,17 +57,26 @@ final class MachineCore {
         }
         logger.finer(prefix + "validating transitions");
         // confirm that all transition targets exist
-        if (strict)
+        if (checked)
             this.map.forEach((origin, map) -> map.forEach((event, transition) -> {
                 if (!this.map.containsKey(transition.target)) {
-
-                    throw new IllegalArgumentException("transition '" + event + "' on state '" + origin
-                            + "' has unknown target state '" + transition.target + "'");
-
+                    if (strict) {
+                        logger.severe("transition '" + event + "' on state '" + origin + "' leads to terminal state '"
+                                + transition.target + "'");
+                        throw new IllegalArgumentException("transition '" + event + "' on state '" + origin
+                                + "' leads to terminal state '" + transition.target + "'");
+                    } else {
+                        logger.warning("transition '" + event + "' on state '" + origin + "' leads to terminal state '"
+                                + transition.target + "'");
+                    }
                 }
             }));
-        else
-            logger.warning(prefix + "skipping search for terminal states");
+        else {
+            if (strict)
+                logger.warning(prefix + "terminal state check is disabled but terminal states are not allowed");
+            else
+                logger.warning(prefix + "terminal state check is disabled");
+        }
         logger.finer(prefix + "validating initial state " + initialState);
         // confirm that initial state is well-defined
         if (!this.map.containsKey(this.initialState))
@@ -122,7 +134,8 @@ final class MachineCore {
         sb.append("> states:           " + getStateCount() + "\n");
         sb.append("> transitions:      " + getTransitionCount() + "\n");
         sb.append("> initial state:    " + initialState + "\n");
-        sb.append("> allows terminals: " + (strict ? "no" : "yes"));
+        sb.append("> allows terminals: " + (strict ? "no" : "yes") + "\n");
+        sb.append("> terminals check:  " + (checked ? strict ? "full" : "warning only" : "disabled"));
         return sb.toString();
     }
 
@@ -190,7 +203,5 @@ final class MachineCore {
         }
         return true;
     }
-    
-    
 
 }
