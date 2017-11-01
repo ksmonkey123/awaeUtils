@@ -1,6 +1,7 @@
 package ch.awae.utils.statemachine;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -22,7 +23,7 @@ import java.util.UUID;
  * 
  * @author Andreas Wälchli
  * @since awaeUtils 0.0.3
- * @version 1.3 (0.0.4)
+ * @version 1.4 (0.0.5)
  * 
  * @see StateMachine
  * @see StateMachineBuilder
@@ -191,6 +192,100 @@ public final class MachineCoreBuilder {
     public MachineCoreBuilder setInitialState(String state) {
         initialState = Objects.requireNonNull(state, "'state' may not be null");
         return this;
+    }
+
+    /**
+     * Creates a network of states and transitions covering all possible
+     * permutations of a given list of events. Essentially this represents a
+     * situation where every event must occur but the order is irrelevant. The
+     * resulting network will grow very quickly. For a sequence of length
+     * {@code n} there will be generated {@code n!} intermediate states.
+     * Currently there is no optimisation performed on the network.
+     * 
+     * @param from
+     *            the state the transition originates from. may not be
+     *            {@code null}
+     * @param sequence
+     *            the list of events that triggers the transitions. may not be
+     *            {@code null} and must have at least one item.
+     * @param to
+     *            the state the transition leads to. may be identical to
+     *            {@code from}. may not be {@code null}
+     * @param events
+     *            an array of all events that shall be triggered by the
+     *            transition. may be {@code null}. no element may be
+     *            {@code null}
+     * @param commands
+     *            an array of all commands that shall be triggered by the
+     *            transition. may be {@code null}. no element may be
+     *            {@code null}
+     * @return the builder itself
+     * @throws NullPointerException
+     *             if any {@code String} parameter or any array element is
+     *             {@code null}
+     * @throws IllegalArgumentException
+     *             the sequence is empty
+     * @since 1.4 (0.0.5)
+     */
+    public MachineCoreBuilder addArbitrarySequence(String from, String[] sequence, String to, String[] events,
+            String[] commands) {
+        // recursive resolution of null arrays
+        if (events == null)
+            return addArbitrarySequence(from, sequence, to, new String[0], commands);
+        if (commands == null)
+            return addArbitrarySequence(from, sequence, to, events, new String[0]);
+
+        // preliminary input validation
+        Objects.requireNonNull(from, "'from' may not be null");
+        Objects.requireNonNull(sequence, "'seqence' may not be null");
+        Objects.requireNonNull(commands, "'commands' may not be null");
+        if (sequence.length == 0)
+            throw new IllegalArgumentException("empty sequence is not allowed");
+        for (int i = 0; i < sequence.length; i++)
+            Objects.requireNonNull(sequence[i], "'sequence[" + i + "]' may not be null");
+        // sequence of length 1 is just a transition
+        if (sequence.length == 1)
+            return addTransition(from, sequence[0], to, events, commands);
+        // build sequence
+        for (String event : sequence) {
+            String state = UUID.randomUUID().toString();
+            // build remainder
+            ArrayList<String> remaining = new ArrayList<>();
+            remaining.addAll(Arrays.asList(sequence));
+            remaining.remove(event);
+            // register transition
+            addTransition(from, event, state, null, null);
+            // register remaining network
+            addArbitrarySequence(state, remaining.toArray(new String[0]), to, events, commands);
+        }
+        // done
+        return this;
+    }
+
+    /**
+     * Searches the target state for a given transition originating at a given
+     * node
+     * 
+     * @param origin
+     *            the state the transition originates at
+     * @param event
+     *            the event triggering the transition
+     * @return the target state of the transition or {@code null} if no matching
+     *         transition was found
+     * 
+     * @since 1.4 (0.0.5)
+     */
+    public String getTarget(String origin, String event) {
+        synchronized (LOCK) {
+            for (Transition transition : transitions) {
+                if (!transition.origin.equals(origin))
+                    continue;
+                if (!transition.event.equals(event))
+                    continue;
+                return transition.target;
+            }
+        }
+        return null;
     }
 
     /**
