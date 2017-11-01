@@ -141,4 +141,56 @@ final class MachineCore {
         return builder.toString();
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + coreID;
+        result = prime * result + ((initialState == null) ? 0 : initialState.hashCode());
+        result = prime * result + ((map == null) ? 0 : map.hashCode());
+        result = prime * result + (strict ? 1231 : 1237);
+        result = prime * result + transitionCount;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof MachineCore)) {
+            return false;
+        }
+        MachineCore other = (MachineCore) obj;
+        if (coreID != other.coreID) {
+            return false;
+        }
+        if (initialState == null) {
+            if (other.initialState != null) {
+                return false;
+            }
+        } else if (!initialState.equals(other.initialState)) {
+            return false;
+        }
+        if (map == null) {
+            if (other.map != null) {
+                return false;
+            }
+        } else if (!map.equals(other.map)) {
+            return false;
+        }
+        if (strict != other.strict) {
+            return false;
+        }
+        if (transitionCount != other.transitionCount) {
+            return false;
+        }
+        return true;
+    }
+    
+    
+
 }

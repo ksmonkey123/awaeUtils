@@ -1,5 +1,6 @@
 package ch.awae.utils.statemachine;
 
+import java.io.Serializable;
 import java.util.concurrent.BlockingQueue;
 
 /**
@@ -32,15 +33,20 @@ import java.util.concurrent.BlockingQueue;
  * to the state machine as the event queue is.
  * </p>
  * <p>
- * State machines have built in logging support using {@code java.util.logging.Logger}.
- * All logging is done using the logger {@code ch.awae.utils.statemachine.StateMachine}.
- * For the logging the following levels are used:
+ * State machines have built in logging support using
+ * {@code java.util.logging.Logger}. All logging is done using the logger
+ * {@code ch.awae.utils.statemachine.StateMachine}. For the logging the
+ * following levels are used:
  * <ul>
- *  <li>{@code SEVERE} - a machine core failed to instantiate</li>
- *  <li>{@code WARNING} - a machine core that allows terminal states has a terminal state (which is discouraged)</li>
- *  <li>{@code CONFIG} - machine configuration summary on state machine creation</li>
- *  <li>{@code FINE} - major events in the lifecycle of the state machine (e.g. worker thread started/stopped, a state change in a core)</li>
- *  <li>{@code FINER/FINEST} - detailed data for every action taken on a state machine or core</li>
+ * <li>{@code SEVERE} - a machine core failed to instantiate</li>
+ * <li>{@code WARNING} - a machine core that allows terminal states has a
+ * terminal state (which is discouraged)</li>
+ * <li>{@code CONFIG} - machine configuration summary on state machine
+ * creation</li>
+ * <li>{@code FINE} - major events in the lifecycle of the state machine (e.g.
+ * worker thread started/stopped, a state change in a core)</li>
+ * <li>{@code FINER/FINEST} - detailed data for every action taken on a state
+ * machine or core</li>
  * </ul>
  * </p>
  * 
@@ -150,7 +156,7 @@ public interface StateMachine {
      * @since awaeUtils 0.0.5
      * @version 1.1
      */
-    interface SavedState {
+    interface SavedState extends Serializable {
         /**
          * provides the UUID associated with the {@link StateMachine} that
          * created this instance.

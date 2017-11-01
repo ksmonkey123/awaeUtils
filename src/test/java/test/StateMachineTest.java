@@ -37,7 +37,7 @@ public class StateMachineTest {
 
         b2.addTransition("off", "x", "on", null, new String[] { "someone activated" });
         b2.addTransition("on", "y", "off", null, new String[] { "someone deactivated" });
-        b2.addArbitrarySequence("a", new String[] { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" }, "b", null, null);
+        b2.addArbitrarySequence("a", new String[] { "1", "2", "3", "4" }, "b", null, null);
         b2.setAllowTerminalStates(true);
 
         StateMachineBuilder b = new StateMachineBuilder();

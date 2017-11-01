@@ -201,12 +201,16 @@ final class StateMachineImpl implements StateMachine {
 
     @Override
     public void loadState(StateMachine.SavedState state, boolean clear) {
+        logger.fine(uuid + ": attempting to load saved state");
         Objects.requireNonNull(state, "'state' may not be null");
         if (!(state instanceof SavedState))
             throw new IllegalArgumentException("save type not compatible with instance");
         SavedState save = (SavedState) state;
-        if (!save.uuid.equals(uuid))
+        logger.finer(uuid + ": matching uuids");
+        if (!save.uuid.equals(uuid)) {
+            logger.severe(uuid + ": save uuid mismatch: " + save.uuid);
             throw new IllegalArgumentException("save uuid mismatch: read: " + save.uuid + " expected: " + uuid);
+        }
         logger.fine(uuid + ": reloading states " + (clear ? "with" : "without") + " event queue reset");
         // prepare load
         synchronized (LOCK) {
@@ -230,6 +234,8 @@ final class StateMachineImpl implements StateMachine {
     }
 
     private static class SavedState implements StateMachine.SavedState {
+
+        private static final long serialVersionUID = 1L;
 
         final String   uuid;
         final String[] states;
