@@ -55,7 +55,7 @@ public final class Trampoline {
 		private final T value;
 		private final Supplier<Result<T>> supplier;
 
-		private Result(final boolean isValue, final T value, final Supplier<Result<T>> supplier) {
+		Result(final boolean isValue, final T value, final Supplier<Result<T>> supplier) {
 			this.isValue = isValue;
 			this.value = isValue ? value : null;
 			this.supplier = isValue ? null : supplier;
@@ -66,7 +66,7 @@ public final class Trampoline {
 		 * 
 		 * @return {@code true} if the Result is a return value.
 		 */
-		final private boolean isReturn() {
+		final boolean isReturn() {
 			return this.isValue;
 		}
 
@@ -77,7 +77,7 @@ public final class Trampoline {
 		 * @throws UnsupportedOperationException
 		 *             if this result does not represent a return value.
 		 */
-		final private T get() {
+		final T get() {
 			if (this.isValue)
 				return this.value;
 			throw new UnsupportedOperationException();
@@ -91,7 +91,7 @@ public final class Trampoline {
 		 * @throws UnsupportedOperationException
 		 *             if the Result is a return value.
 		 */
-		final private Result<T> call() {
+		final Result<T> call() {
 			if (this.isValue)
 				throw new UnsupportedOperationException();
 			return this.supplier.get();

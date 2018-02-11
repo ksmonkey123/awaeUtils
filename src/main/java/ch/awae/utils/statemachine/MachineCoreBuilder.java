@@ -22,24 +22,29 @@ import java.util.logging.Logger;
  * <p>
  * A machine core is constructed by defining a list of transitions. From these
  * transitions the states are extracted automatically. Transitions can be added
- * by calling
- * {@link #addTransition(String, String, String, String[], String[])}. Every
+ * by calling {@link #addTransition(String, String, String, String...)}. Every
  * machine core requires an initial state to be defined. That is the state the
  * machine core starts in and is reverted to whenever a state machine is reset
  * using {@link StateMachine#reset()}. This initial state can be set through
  * {@link #setInitialState(String)}.
  * </p>
+ * <h4>Event Resolution</h4> It is possible to create local events. These events
+ * are designed to be ignored by all other cores. They are prefixed with a fixed
+ * string. Local events are referred to by adding {@code local:} to the event
+ * name. That prefix will internally be replaced with the fixed string. Output
+ * events with the prefix {@code c:} are interpreted as commands and are added
+ * to the command queue (without the prefix). All others are handled as internal
+ * events.
  * <h4>Helper Methods</h4>
  * <p>
- * The method {@link #addSequence(String, String[], String, String[], String[])}
- * allows for easy definition of a <em>transition sequence</em>, i.e. an ordered
- * list of events that - if occurring in that sequence - result in a given
+ * The method {@link #addSequence(String, String[], String, String...)} allows
+ * for easy definition of a <em>transition sequence</em>, i.e. an ordered list
+ * of events that - if occurring in that sequence - result in a given
  * transition. The intermediate states are generated internally and are expected
  * to be unique (the state names are derived from random {@link UUID}'s).
  * </p>
  * <p>
- * The method
- * {@link #addArbitrarySequence(String, String[], String, String[], String[])}
+ * The method {@link #addArbitrarySequence(String, String[], String, String...)}
  * allows for easy definition of a set of transitions for a given unordered list
  * of events. The resulting transitions represent a system where all events in
  * the given list must occur in any order to result in a given transition. The
@@ -48,13 +53,13 @@ import java.util.logging.Logger;
  * states may be created.
  * </p>
  * <p>
- * The method {@link #addFunnel(String[], String, String, String[], String[])}
- * allows for easy definition of the same transition from multiple origins to a
- * single target state. This is very useful if there are multiple states that
- * should respond to a given event identically. If combined with the
- * {@link #addSequence(String, String[], String, String[], String[])} method
- * this can for example be used to create "reset" transitions for each
- * intermediate state in the sequence.
+ * The method {@link #addFunnel(String[], String, String, String...)} allows for
+ * easy definition of the same transition from multiple origins to a single
+ * target state. This is very useful if there are multiple states that should
+ * respond to a given event identically. If combined with the
+ * {@link #addSequence(String, String[], String, String...)} method this can for
+ * example be used to create "reset" transitions for each intermediate state in
+ * the sequence.
  * </p>
  * <h3>Terminal State Checking</h3>
  * <p>
@@ -79,7 +84,7 @@ import java.util.logging.Logger;
  * 
  * @author Andreas Wälchli
  * @since awaeUtils 0.0.3
- * @version 1.4 (0.0.5)
+ * @version 2.0 (0.0.6)
  * 
  * @see StateMachine
  * @see StateMachineBuilder
@@ -90,14 +95,31 @@ public final class MachineCoreBuilder {
     private String                initialState  = null;
     private boolean               allowTerminal = false;
     private boolean               checkTerminal = true;
+    private final String          localKey;
 
     private final Object LOCK = new Object();
 
     /**
-     * creates a new empty builder
+     * creates a new empty builder with a random local id
      */
     public MachineCoreBuilder() {
-        super();
+        this(UUID.randomUUID().toString());
+    }
+
+    /**
+     * creates a new empty builder with the provided local id
+     * 
+     * @param localID
+     *            the local id
+     * @throws NullPointerException
+     *             localID is null
+     * @throws IllegalArgumentException
+     *             localID is empty
+     */
+    public MachineCoreBuilder(String localID) {
+        localKey = Objects.requireNonNull(localID);
+        if (localID.isEmpty())
+            throw new IllegalArgumentException("local id may not be empty");
     }
 
     /**
@@ -115,9 +137,26 @@ public final class MachineCoreBuilder {
         checkTerminal = builder.checkTerminal;
         initialState = builder.initialState;
         allowTerminal = builder.allowTerminal;
+        localKey = builder.localKey;
         synchronized (builder.LOCK) {
             transitions.addAll(builder.transitions);
         }
+    }
+
+    private String resolveInbound(String event) {
+        if (event.startsWith("local:"))
+            return localKey + ":" + event.substring(6);
+        else
+            return event;
+    }
+
+    private Command resolveCommand(String key) {
+        if (key.startsWith("c:"))
+            return new Command(CommandType.COMMAND, key.substring(2));
+        else if (key.startsWith("local:"))
+            return new Command(CommandType.EVENT, localKey + ":" + key.substring(6));
+        else
+            return new Command(CommandType.EVENT, key);
     }
 
     /**
@@ -132,6 +171,15 @@ public final class MachineCoreBuilder {
     public MachineCoreBuilder setCheckForTerminalStates(boolean check) {
         checkTerminal = check;
         return this;
+    }
+
+    /**
+     * Provides the local id that is used to prefix local events
+     * 
+     * @return the local id
+     */
+    public String getLocalID() {
+        return this.localKey;
     }
 
     /**
@@ -151,39 +199,28 @@ public final class MachineCoreBuilder {
      *            transition. may be {@code null}. no element may be
      *            {@code null}
      * @param commands
-     *            an array of all commands that shall be triggered by the
-     *            transition. may be {@code null}. no element may be
-     *            {@code null}
      * @return the builder itself
      * @throws NullPointerException
      *             if any {@code String} parameter or any array element is
      *             {@code null}
      */
-    public MachineCoreBuilder addTransition(String from, String event, String to, String[] events, String[] commands) {
+    public MachineCoreBuilder addTransition(String from, String event, String to, String... events) {
         // recursive resolution of null arrays
         if (events == null)
-            return addTransition(from, event, to, new String[0], commands);
-        if (commands == null)
-            return addTransition(from, event, to, events, new String[0]);
+            return addTransition(from, event, to, new String[0]);
 
         // preliminary input validation
         Objects.requireNonNull(from, "'from' may not be null");
         Objects.requireNonNull(event, "'event' may not be null");
-        Objects.requireNonNull(commands, "'commands' may not be null");
 
         // construct command array
-        Command[] cmds = new Command[events.length + commands.length];
+        Command[] cmds = new Command[events.length];
 
         for (int i = 0; i < events.length; i++)
-            cmds[i] = new Command(CommandType.EVENT,
-                    Objects.requireNonNull(events[i], "'events[" + i + "]' may not be null"));
-
-        for (int i = 0; i < commands.length; i++)
-            cmds[i + events.length] = new Command(CommandType.COMMAND,
-                    Objects.requireNonNull(commands[i], "'commands[" + i + "]' may not be null"));
+            cmds[i] = resolveCommand(events[i]);
 
         // add transition
-        Transition transition = new Transition(from, event, to, cmds);
+        Transition transition = new Transition(from, resolveInbound(event), to, cmds);
         synchronized (LOCK) {
             transitions.add(transition);
         }
@@ -217,40 +254,22 @@ public final class MachineCoreBuilder {
      *             {@code null}
      * @since 1.4 (0.0.5)
      */
-    public MachineCoreBuilder addFunnel(String[] from, String event, String to, String[] events, String[] commands) {
+    public MachineCoreBuilder addFunnel(String[] from, String event, String to, String... events) {
         // recursive resolution of null arrays
         if (events == null)
-            return addFunnel(from, event, to, new String[0], commands);
-        if (commands == null)
-            return addFunnel(from, event, to, events, new String[0]);
+            return addFunnel(from, event, to, new String[0]);
 
         // preliminary input validation
         Objects.requireNonNull(from, "'from' may not be null");
         Objects.requireNonNull(event, "'event' may not be null");
-        Objects.requireNonNull(commands, "'commands' may not be null");
         if (from.length == 0)
             throw new IllegalArgumentException("empty 'from' array is not allowed");
         for (int i = 0; i < from.length; i++)
             Objects.requireNonNull(from[i], "'from[" + i + "]' may not be null");
 
-        // construct command array
-        Command[] cmds = new Command[events.length + commands.length];
-
-        for (int i = 0; i < events.length; i++)
-            cmds[i] = new Command(CommandType.EVENT,
-                    Objects.requireNonNull(events[i], "'events[" + i + "]' may not be null"));
-
-        for (int i = 0; i < commands.length; i++)
-            cmds[i + events.length] = new Command(CommandType.COMMAND,
-                    Objects.requireNonNull(commands[i], "'commands[" + i + "]' may not be null"));
-
-        // add transition
-        for (String state : from) {
-            Transition transition = new Transition(state, event, to, cmds);
-            synchronized (LOCK) {
-                transitions.add(transition);
-            }
-        }
+        // core logic
+        for (String node : from)
+            addTransition(node, event, to, events);
         return this;
     }
 
@@ -300,24 +319,22 @@ public final class MachineCoreBuilder {
      *             the sequence is empty
      * @since 1.3 (0.0.5)
      */
-    public String[] addSequence(String from, String[] sequence, String to, String[] events, String[] commands) {
+    public String[] addSequence(String from, String[] sequence, String to, String... events) {
         // recursive resolution of null arrays
         if (events == null)
-            return addSequence(from, sequence, to, new String[0], commands);
-        if (commands == null)
-            return addSequence(from, sequence, to, events, new String[0]);
+            return addSequence(from, sequence, to, new String[0]);
 
         // preliminary input validation
         Objects.requireNonNull(from, "'from' may not be null");
         Objects.requireNonNull(sequence, "'seqence' may not be null");
-        Objects.requireNonNull(commands, "'commands' may not be null");
+
         if (sequence.length == 0)
             throw new IllegalArgumentException("empty sequence is not allowed");
         for (int i = 0; i < sequence.length; i++)
             Objects.requireNonNull(sequence[i], "'sequence[" + i + "]' may not be null");
         // sequence of length 1 is just a transition
         if (sequence.length == 1) {
-            addTransition(from, sequence[0], to, events, commands);
+            addTransition(from, sequence[0], to, events);
             return new String[0];
         }
         // build sequence
@@ -326,12 +343,12 @@ public final class MachineCoreBuilder {
         for (int i = 0; i < sequence.length - 1; i++) {
             // intermediate state
             String uuid = UUID.randomUUID().toString();
-            addTransition(state, sequence[i], uuid, null, null);
+            addTransition(state, sequence[i], uuid);
             state = uuid;
             states[i] = state;
         }
         // build last transition
-        addTransition(state, sequence[sequence.length - 1], to, events, commands);
+        addTransition(state, sequence[sequence.length - 1], to, events);
         return states;
     }
 
@@ -384,25 +401,22 @@ public final class MachineCoreBuilder {
      *             the sequence is empty
      * @since 1.4 (0.0.5)
      */
-    public MachineCoreBuilder addArbitrarySequence(String from, String[] sequence, String to, String[] events,
-            String[] commands) {
+    public MachineCoreBuilder addArbitrarySequence(String from, String[] sequence, String to, String... events) {
         // recursive resolution of null arrays
         if (events == null)
-            return addArbitrarySequence(from, sequence, to, new String[0], commands);
-        if (commands == null)
-            return addArbitrarySequence(from, sequence, to, events, new String[0]);
+            return addArbitrarySequence(from, sequence, to, new String[0]);
 
         // preliminary input validation
         Objects.requireNonNull(from, "'from' may not be null");
         Objects.requireNonNull(sequence, "'seqence' may not be null");
-        Objects.requireNonNull(commands, "'commands' may not be null");
+
         if (sequence.length == 0)
             throw new IllegalArgumentException("empty sequence is not allowed");
         for (int i = 0; i < sequence.length; i++)
             Objects.requireNonNull(sequence[i], "'sequence[" + i + "]' may not be null");
         // sequence of length 1 is just a transition
         if (sequence.length == 1)
-            return addTransition(from, sequence[0], to, events, commands);
+            return addTransition(from, sequence[0], to, events);
         // build sequence
         for (String event : sequence) {
             String state = UUID.randomUUID().toString();
@@ -411,9 +425,9 @@ public final class MachineCoreBuilder {
             remaining.addAll(Arrays.asList(sequence));
             remaining.remove(event);
             // register transition
-            addTransition(from, event, state, null, null);
+            addTransition(from, event, state);
             // register remaining network
-            addArbitrarySequence(state, remaining.toArray(new String[0]), to, events, commands);
+            addArbitrarySequence(state, remaining.toArray(new String[0]), to, events);
         }
         // done
         return this;
@@ -433,11 +447,12 @@ public final class MachineCoreBuilder {
      * @since 1.4 (0.0.5)
      */
     public String getTarget(String origin, String event) {
+        String evt = resolveInbound(event);
         synchronized (LOCK) {
             for (Transition transition : transitions) {
                 if (!transition.origin.equals(origin))
                     continue;
-                if (!transition.event.equals(event))
+                if (!transition.event.equals(evt))
                     continue;
                 return transition.target;
             }
