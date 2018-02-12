@@ -57,6 +57,22 @@ public interface Logic {
     boolean evaluate();
 
     /**
+     * calls the handler if this instance evaluates to true.
+     * 
+     * @param handler
+     *            the handler to be called if the logic instance evaluates to
+     *            true
+     * @throws NullPointerException
+     *             the handler is null
+     * @since awaeUtils 0.0.7
+     */
+    default void test(Runnable handler) {
+        Objects.requireNonNull(handler);
+        if (evaluate())
+            handler.run();
+    }
+
+    /**
      * Returns an instance with inverted logic. This inverted logic instance
      * evaluates this instance and inverts the result.
      * 
