@@ -1,6 +1,7 @@
 package ch.awae.utils.logic;
 
 import java.util.Objects;
+import java.util.function.BooleanSupplier;
 
 /**
  * Base interface for composeable boolean logic operating on a {@link Model}.
@@ -12,6 +13,7 @@ import java.util.Objects;
  * </p>
  * 
  * @author Andreas Wälchli
+ * @since awaeUtils 0.0.6
  */
 @FunctionalInterface
 public interface Logic {
@@ -39,12 +41,12 @@ public interface Logic {
     /**
      * a logic instance that always evaluates to {@code true}
      */
-    final static Logic TRUE = new FunctionalLogic(() -> true);
+    final static Logic TRUE = () -> true;
 
     /**
      * a logic instance that always evaluates to {@code false}
      */
-    final static Logic FALSE = new FunctionalLogic(() -> false);
+    final static Logic FALSE = () -> false;
 
     /**
      * Evaluates the logic object to a boolean value. Usually checks if the
@@ -106,11 +108,34 @@ public interface Logic {
         return or(this, other);
     }
 
+    /**
+     * Creates an edge-triggering {@link Logic} instance.
+     * 
+     * Only evaluates to {@code true} the first time the base {@link Logic}
+     * evaluates to {@code true} after previously evaluating to {@code false}.
+     * This emulates edge triggering on a rising edge.
+     * 
+     * @return an edge triggering {@link Logic} instance
+     */
     default Logic edge() {
         return new EdgeLogic(this);
     }
-    
+
     // ====== FACTORY STYLE METHODS ======
+
+    /**
+     * Creates a new {@link Logic} instance from a {@code BooleanSupplier}
+     * 
+     * @param f
+     *            the boolean supplier
+     * @return a new {@link Logic} instance
+     * @throws NullPointerException
+     *             if the f parameter is {@code null}
+     */
+    static Logic from(BooleanSupplier f) {
+        Objects.requireNonNull(f, "no parameter may be null!");
+        return () -> f.getAsBoolean();
+    }
 
     /**
      * Creates a {@link Logic} instance that combines all given logic instances
@@ -141,14 +166,14 @@ public interface Logic {
         if (logics.length == 0)
             throw new IllegalArgumentException("logics array may not be empty!");
         // code
-        return new FunctionalLogic(() -> {
+        return () -> {
             if (logic0.evaluate())
                 return true;
             for (Logic logic : logics)
                 if (logic.evaluate())
                     return true;
             return false;
-        });
+        };
     }
 
     /**
@@ -180,14 +205,14 @@ public interface Logic {
         if (logics.length == 0)
             throw new IllegalArgumentException("logics array may not be empty!");
         // code
-        return new FunctionalLogic(() -> {
+        return () -> {
             if (!logic0.evaluate())
                 return false;
             for (Logic logic : logics)
                 if (!logic.evaluate())
                     return false;
             return true;
-        });
+        };
     }
 
     /**
@@ -224,13 +249,13 @@ public interface Logic {
         if (target > logics.length)
             throw new IllegalArgumentException("the target value may not exceed the size of the logics array");
         // code
-        return new FunctionalLogic(() -> {
+        return () -> {
             int counter = 0;
             for (Logic logic : logics)
                 if (logic.evaluate())
                     counter++;
             return counter == target;
-        });
+        };
     }
 
     /**
@@ -247,12 +272,6 @@ public interface Logic {
      *             if the logics array is empty
      */
     static Logic none(Logic... logics) {
-        Objects.requireNonNull(logics, "the logics array may not be null!");
-        for (Logic l : logics)
-            Objects.requireNonNull(l, "no logic instance may be null!");
-        if (logics.length == 0)
-            throw new IllegalArgumentException("logics array may not be empty!");
-        // code
         return any(logics).not();
     }
 
@@ -271,12 +290,6 @@ public interface Logic {
      *             if the logics array is empty
      */
     static Logic all(Logic... logics) {
-        Objects.requireNonNull(logics, "the logics array may not be null!");
-        for (Logic l : logics)
-            Objects.requireNonNull(l, "no logic instance may be null!");
-        if (logics.length == 0)
-            throw new IllegalArgumentException("logics array may not be empty!");
-        // code
         return and(TRUE, logics);
     }
 
@@ -295,12 +308,6 @@ public interface Logic {
      *             if the logics array is empty
      */
     static Logic any(Logic... logics) {
-        Objects.requireNonNull(logics, "the logics array may not be null!");
-        for (Logic l : logics)
-            Objects.requireNonNull(l, "no logic instance may be null!");
-        if (logics.length == 0)
-            throw new IllegalArgumentException("logics array may not be empty!");
-        // code
         return or(FALSE, logics);
     }
 
@@ -314,12 +321,23 @@ public interface Logic {
      *             if the logic parameter is {@code null}
      */
     static Logic not(Logic logic) {
-        Objects.requireNonNull(logic, "the logic parameter may not be null");
         return logic.not();
     }
 
+    /**
+     * Creates an edge triggered logic instance.
+     * 
+     * This new instance only evaluates to {@code true} the first time the base
+     * {@link Logic} evaluates to {@code true} after previously evaluating to
+     * {@code false}. This emulates edge triggering on a rising edge.
+     * 
+     * @param logic
+     *            the instance to base the edge triggering on
+     * @return an edge triggering {@link Logic} instance
+     * @throws NullPointerException
+     *             if the logic parameter is {@code null}
+     */
     static Logic edge(Logic logic) {
-        Objects.requireNonNull(logic, "the logic parameter may not be null");
         return logic.edge();
     }
 

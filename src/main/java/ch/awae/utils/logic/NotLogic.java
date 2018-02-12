@@ -6,6 +6,7 @@ import java.util.Objects;
  * Inverted {@link Logic} instance
  * 
  * @author Andreas Wälchli
+ * @since awaeUtils 0.0.6
  * 
  * @see Logic
  */

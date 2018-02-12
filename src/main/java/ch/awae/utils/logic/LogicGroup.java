@@ -8,6 +8,7 @@ import java.util.Objects;
  * least one member. This is enforced during creation.
  * 
  * @author Andreas Wälchli
+ * @since awaeUtils 0.0.6
  * 
  * @see Logic
  */
@@ -101,10 +102,13 @@ public final class LogicGroup {
 
     /**
      * Merges this LogicGroup with another one and returns a new LogicGroup
-     * containing the members from both this and the other group.
+     * containing the members from both this and the other group. There are no
+     * duplicate checks present, therefore this should only be used for disjoint
+     * groups.
      * 
      * @param other
-     * @return
+     *            the group to merge this group with
+     * @return a combined group
      */
     public LogicGroup merge(LogicGroup other) {
         Objects.requireNonNull(other);
@@ -115,6 +119,22 @@ public final class LogicGroup {
         return new LogicGroup(children);
     }
 
+    /**
+     * Strict group evaluation on a restricted domain. The generated
+     * {@link Logic} instance evaluates to {@code true} iff all elements of this
+     * group evaluate to {@code true} (i.e. {@code this.all() == true}) and the
+     * given domain has {@code n} elements that evaluate to {@code true}, where
+     * {@code n == this.size()}. There are no checks done, therefore one must
+     * ensure that provided domain is a superset of this group.
+     * 
+     * This allows to check if from a given domain exactly the elements of this
+     * group evaluate to {@code true}.
+     * 
+     * @param domain
+     *            the domain to restrict over.
+     * @throws NullPointerException
+     *             the domain is null
+     */
     public Logic strict(LogicGroup domain) {
         return all().and(domain.count(size()));
     }
