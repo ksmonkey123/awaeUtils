@@ -107,7 +107,7 @@ public interface Logic {
     }
 
     default Logic edge() {
-        return new NotLogic(this);
+        return new EdgeLogic(this);
     }
     
     // ====== FACTORY STYLE METHODS ======
