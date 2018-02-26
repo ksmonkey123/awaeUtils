@@ -1,5 +1,6 @@
 package ch.awae.utils.functional;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
@@ -13,7 +14,9 @@ import java.util.Objects;
  * @param <B>
  *            the type or the second element
  */
-public class T2<A, B> {
+public class T2<A, B> implements Serializable {
+
+    private static final long serialVersionUID = -9018879700576354198L;
 
     /**
      * The first element
@@ -70,4 +73,9 @@ public class T2<A, B> {
     public String toString() {
         return "(" + this._1 + "," + this._2 + ")";
     }
+
+    public <C> T3<A, B, C> and(C c) {
+        return new T3<>(_1, _2, c);
+    }
+
 }

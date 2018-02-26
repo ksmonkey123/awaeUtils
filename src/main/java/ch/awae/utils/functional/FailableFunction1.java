@@ -8,11 +8,11 @@ package ch.awae.utils.functional;
  * @since awaeUtils 1.0.0
  */
 @FunctionalInterface
-public interface FailableFunction1<A, B> {
+public interface FailableFunction1<A, T> {
 
-    B apply(A a) throws Throwable;
+    T apply(A a) throws Throwable;
 
-    default <C> FailableFunction1<A, C> andThen(FailableFunction1<B, C> f) {
+    default <S> FailableFunction1<A, S> andThen(FailableFunction1<T, S> f) {
         return a -> f.apply(this.apply(a));
     }
 
