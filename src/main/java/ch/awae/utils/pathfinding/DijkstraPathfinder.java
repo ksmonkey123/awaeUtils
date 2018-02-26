@@ -16,7 +16,7 @@ import ch.awae.utils.collection.mutable.PriorityQueue;
  * object equality
  * 
  * @author Andreas Wälchli
- * @version 1.1, 2015-05-09
+ * @since awaeUtils 1.0.0
  *
  * @param <V>
  *            the vertex type of the pathfinder

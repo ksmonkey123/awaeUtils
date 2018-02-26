@@ -9,6 +9,7 @@ import ch.awae.utils.collection.mutable.PriorityQueue;
  * added option to define the shutdown order.
  *
  * @author Andreas Wälchli
+ * @since awaeUtils 1.0.0
  */
 public final class Shutdown {
 
@@ -107,7 +108,7 @@ public final class Shutdown {
     /**
      * @throws NullPointerException
      *             if the {@code r} argument is {@code null}
-     * @since 1.3
+     *  1.3
      */
     public void add(Runnable r, double priority) {
         Objects.requireNonNull(r, "no null runnable allowed");

@@ -11,7 +11,7 @@ import java.util.function.Supplier;
  * therefore.
  * 
  * @author Andreas Wälchli
- * @version 1.2, 2015-05-09
+ * @since awaeUtils 1.0.0
  *
  * @param <T>
  *            The Content type

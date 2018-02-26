@@ -1,6 +1,6 @@
 package ch.awae.utils.sequence;
 
-import ch.awae.utils.functional.InterruptableRunnable;
+import ch.awae.utils.functional.InterruptibleRunnable;
 
 final class SubSequenceBuilder<T extends ISequenceBuilder<T>> implements ISubSequenceBuilder<T> {
 
@@ -16,7 +16,7 @@ final class SubSequenceBuilder<T extends ISequenceBuilder<T>> implements ISubSeq
     }
 
     @Override
-    public ISubSequenceBuilder<T> step(InterruptableRunnable step) {
+    public ISubSequenceBuilder<T> step(InterruptibleRunnable step) {
         base = base.step(step);
         return this;
     }
@@ -28,7 +28,7 @@ final class SubSequenceBuilder<T extends ISequenceBuilder<T>> implements ISubSeq
 
     @Override
     public T end() {
-        InterruptableRunnable raw = base.compileRaw();
+        InterruptibleRunnable raw = base.compileRaw();
         if (infinite) {
             return parent.step(() -> {
                 while (true) {

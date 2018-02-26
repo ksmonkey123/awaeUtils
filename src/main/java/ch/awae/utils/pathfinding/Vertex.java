@@ -6,7 +6,7 @@ import java.util.List;
  * Base interface for pathfinding graph vertices
  * 
  * @author Andreas Wälchli
- * @version 1.1, 2015-05-09
+ * @since awaeUtils 1.0.0
  *
  * @param <T>
  *            the edge type

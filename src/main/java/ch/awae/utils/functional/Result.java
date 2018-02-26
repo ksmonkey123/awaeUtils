@@ -22,7 +22,7 @@ import java.util.function.Consumer;
  * further processing using a functional code style.
  * 
  * @author Andreas Wälchli
- * @version 1.1, 2015-05-11
+ * @since awaeUtils 1.0.0
  *
  * @param <T>
  *            the result type

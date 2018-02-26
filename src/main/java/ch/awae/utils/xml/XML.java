@@ -14,7 +14,7 @@ import org.w3c.dom.Document;
  * vice-versa.
  * 
  * @author Andreas Wälchli
- * @version 1.1, 2015-05-11
+ * @since awaeUtils 1.0.0
  */
 public class XML {
 

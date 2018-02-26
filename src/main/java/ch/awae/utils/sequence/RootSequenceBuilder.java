@@ -1,25 +1,25 @@
 package ch.awae.utils.sequence;
 
-import ch.awae.utils.functional.InterruptableRunnable;
+import ch.awae.utils.functional.InterruptibleRunnable;
 
 final class RootSequenceBuilder implements IRootSequenceBuilder {
 
-    private InterruptableRunnable[] elements;
+    private InterruptibleRunnable[] elements;
 
-    RootSequenceBuilder(InterruptableRunnable... els) {
+    RootSequenceBuilder(InterruptibleRunnable... els) {
         elements = els;
     }
 
-    public RootSequenceBuilder step(InterruptableRunnable r) {
-        InterruptableRunnable[] next = new InterruptableRunnable[elements.length + 1];
+    public RootSequenceBuilder step(InterruptibleRunnable r) {
+        InterruptibleRunnable[] next = new InterruptibleRunnable[elements.length + 1];
         System.arraycopy(elements, 0, next, 0, elements.length);
         next[elements.length] = r;
         return new RootSequenceBuilder(next);
     }
 
-    public InterruptableRunnable compileRaw() {
+    public InterruptibleRunnable compileRaw() {
         return () -> {
-            for (InterruptableRunnable r : elements) {
+            for (InterruptibleRunnable r : elements) {
                 if (Thread.interrupted()) {
                     throw new InterruptedException();
                 }

@@ -2,6 +2,18 @@ package ch.awae.utils.functional;
 
 import java.util.function.Function;
 
+/**
+ * Implementation of a Try monad.
+ * 
+ * The Try monad indicates in the return type that an operation might fail.
+ * Instead of throwing an exception the exception can be returned and handled
+ * gracefully through this monad.
+ * 
+ * @author Andreas Wälchli
+ * @since awaeUtils 1.0.0
+ *
+ * @param <T>
+ */
 public interface Try<T> {
 
     boolean isSuccess();

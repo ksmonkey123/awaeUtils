@@ -1,5 +1,6 @@
 package ch.awae.utils.source;
 
+import java.io.Closeable;
 import java.io.InputStream;
 import java.io.StringReader;
 
@@ -17,9 +18,9 @@ import ch.awae.utils.xml.XML;
  * one-liners
  * 
  * @author Andreas Wälchli
- * @version 1.1, 2015-05-11
+ * @since awaeUtils 1.0.0
  */
-public abstract class Source {
+public abstract class Source implements Closeable {
 
     /**
      * Returns a Source based of the given file name. <br>

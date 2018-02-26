@@ -11,7 +11,7 @@ package ch.awae.utils.concurrent;
  * termination.
  *
  * @author Andreas Wälchli
- * @version 1.2, 2015-05-10
+ * @since awaeUtils 1.0.0
  */
 public abstract class IterativeRunner implements Runnable {
 

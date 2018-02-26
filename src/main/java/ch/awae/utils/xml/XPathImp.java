@@ -19,8 +19,7 @@ import ch.awae.utils.functional.T2;
 
 /**
  * @author Andreas Wälchli
- * @version 1.1, May 11, 2015
- *
+ * @since awaeUtils 1.0.0
  */
 class XPathImp implements XPath {
 

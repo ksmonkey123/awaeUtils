@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
  * max-queue it is the element with the highest priority value
  * 
  * @author Andreas Wälchli
- * @version 1.2, 2015-05-10
+ * @since awaeUtils 1.0.0
  *
  * @param <E>
  *            the element type
@@ -56,7 +56,7 @@ public class PriorityQueue<E> implements Queue<E> {
      * @param <T>
      *            the type of the queue
      * @return the created queue
-     * @since 1.2
+     *  1.2
      */
     public static <T> PriorityQueue<T> maxQueue() {
         return new PriorityQueue<>(false);
@@ -68,7 +68,7 @@ public class PriorityQueue<E> implements Queue<E> {
      * @param <T>
      *            the type of the queue
      * @return the created queue
-     * @since 1.2
+     *  1.2
      */
     public static <T> PriorityQueue<T> minQueue() {
         return new PriorityQueue<>(true);
@@ -142,7 +142,7 @@ public class PriorityQueue<E> implements Queue<E> {
      * indicates if the queue has a max-queue configuration
      * 
      * @return {@code true} iff the queue is a max-queue
-     * @since 1.2
+     *  1.2
      */
     public boolean isMaxQueue() {
         return !this.isMinQueue;
@@ -152,7 +152,7 @@ public class PriorityQueue<E> implements Queue<E> {
      * indicates if the queue has a min-queue configuration
      * 
      * @return {@code true} iff the queue is a min-queue
-     * @since 1.2
+     *  1.2
      */
     public boolean isMinQueue() {
         return this.isMinQueue;

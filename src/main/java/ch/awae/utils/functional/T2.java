@@ -6,7 +6,7 @@ import java.util.Objects;
  * Immutable generic 2-Tuple
  * 
  * @author Andreas Wälchli
- * @version 1.1, 2015-05-09
+ * @since awaeUtils 1.0.0
  *
  * @param <A>
  *            the type of the first element

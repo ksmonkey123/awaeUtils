@@ -1,27 +1,32 @@
 package ch.awae.utils.source;
 
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 
 import ch.awae.utils.functional.Result;
 
-
 final class FileSource extends Source {
 
-	private final String filename;
+    private final String filename;
 
-	FileSource(String filename) {
-		this.filename = filename;
-	}
+    FileSource(String filename) {
+        this.filename = filename;
+    }
 
-	@Override
-	public Result<InputStream> mkStream() {
-		return Result.eval(() -> new FileInputStream(this.filename));
-	}
+    @Override
+    public Result<InputStream> mkStream() {
+        return Result.eval(() -> new FileInputStream(this.filename));
+    }
 
-	@Override
-	public String toString() {
-		return "File Source ( " + this.filename + " )";
-	}
+    @Override
+    public String toString() {
+        return "File Source ( " + this.filename + " )";
+    }
+
+    @Override
+    public void close() throws IOException {
+        // no close required
+    }
 
 }

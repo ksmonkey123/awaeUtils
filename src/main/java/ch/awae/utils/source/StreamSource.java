@@ -1,5 +1,6 @@
 package ch.awae.utils.source;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 import ch.awae.utils.functional.Result;
@@ -16,5 +17,10 @@ class StreamSource extends Source {
 	public Result<InputStream> mkStream() {
 		return Result.ofNullable(this.stream);
 	}
+
+    @Override
+    public void close() throws IOException {
+        stream.close();
+    }
 
 }

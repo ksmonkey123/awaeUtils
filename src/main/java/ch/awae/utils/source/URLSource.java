@@ -1,5 +1,6 @@
 package ch.awae.utils.source;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
@@ -21,6 +22,11 @@ final class URLSource extends Source {
 	@Override
 	public String toString() {
 		return "URL Source ( " + this.url + " )";
+	}
+	
+	@Override
+	public void close() throws IOException {
+	    // no close required
 	}
 
 }
