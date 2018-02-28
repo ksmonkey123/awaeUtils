@@ -1,6 +1,7 @@
 image: maven:3-jdk-8
 
-job.tags:
+job:
+  tags:
     - docker
 
 build:
