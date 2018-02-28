@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 1.0.0
+## Version 1.0.0
 - Migrated various utilities from other projects. These include:
  - Several functional types such as <code>Try</code>, <code>Result</code>,
 							<code>FailableFunction0</code>, <code>FailableFunction1</code>
@@ -16,10 +16,8 @@
 							shutdown hooks that allows the definition of a specific shutdown
 							sequence for shutdown hooks.
 
-			<!-- Version 0.0.6 -->
-			<h3>0.0.6</h3>
-			<ul>
-				<li>added <code>Logic</code> system as an extension to the Java
+## Version 0.0.6
+- added <code>Logic</code> system as an extension to the Java
 					<code>BooleanSupplier</code> interface. <code>Logic</code> allows
 					boolean operations to be done on these provider functions to enable
 					complex behaviour. In essence any boolean composition that could be
@@ -30,86 +28,33 @@
 					instance. Some optimisation similar to classical <em>short
 						circuiting</em> is done (i.e. once the result of an expression is fully
 					known any additional providers are not evaluated).
-				</li>
-				<li>added <code>Sequence</code> for composing runnables into a
+- added <code>Sequence</code> for composing runnables into a
 					predefined interruptible sequence that can be executed
 					asynchronously.
-				</li>
-			</ul>
 
+## Version 0.0.5
+- added helper methods to <code>MachineCoreBuilder</code> for creation of event sequences, event funnels and arbitrary sequence event chains (event sequences for any permutation of a set of events)
+- <code>MachineCoreBuilder</code> can provide target states for a given origin state and event
+- added <code>CommandProcessor</code> as a pre-built asynchronous processor that consumes commands from a <code>StateMachine</code> and passes them on to a given <code>Consumer</code> function
+- added <code>EventGenerator</code> as an asynchronous way to produce and issue events in a fixed rhythm. The events may either be fixed or supplied by a <code>Supplier</code> function
+- <code>StateMachine</code> states can be stored to and loaded from <code>StateMachine.SavedState</code> objects
+- logging support using <code>java.util.logging.Logger</code>
+- the structure of a <code>StateMachine</code> can be extracted into raw <a href="http://www.graphviz.org">Graphviz</a> data
+- machine cores now support terminal states
+- terminal state checking controllable through <code>MachineCoreBuilder</code>
+- introduced new event handling modes for <code>StateMachine</code>:
+ - <em>priority mode</em> (default) processes internal events before external
+ - <em>normal mode</em> enqueues internal processes in the main event queue
+- improved documentation
 
-			<!-- Version 0.0.5 -->
-			<h3>
-				0.0.5 <a class="badge" href="0.0.5">javadoc</a> <a class="badge" href="https://github.com/ksmonkey123/awaeUtils/releases/tag/0.0.5">release</a>
+## Version 0.0.4
+- created <code>ch.awae.utils.statemachine</code> package for creating asynchronous state machine clusters:
+ - use <code>MachineCoreBuilder</code> to create state machine cores
+ - use <code>StateMachineBuilder</code> to create state machine clusters
 
-			</h3>
-			<ul>
-				<li>added helper methods to <code>MachineCoreBuilder</code> for
-					creation of event sequences, event funnels and arbitrary sequence
-					event chains (event sequences for any permutation of a set of
-					events)
-				</li>
-				<li><code>MachineCoreBuilder</code> can provide target states
-					for a given origin state and event</li>
-				<li>added <code>CommandProcessor</code> as a pre-built
-					asynchronous processor that consumes commands from a <code>StateMachine</code>
-					and passes them on to a given <code>Consumer</code> function
-				</li>
-				<li>added <code>EventGenerator</code> as an asynchronous way to
-					produce and issue events in a fixed rhythm. The events may either
-					be fixed or supplied by a <code>Supplier</code> function
-				</li>
-				<li><code>StateMachine</code> states can be stored to and
-					loaded from <code>StateMachine.SavedState</code> objects</li>
-				<li>logging support using <code>java.util.logging.Logger</code></li>
-				<li>the structure of a <code>StateMachine</code> can be
-					extracted into raw <a href="http://www.graphviz.org">Graphviz</a>
-					data
-				</li>
-				<li>machine cores now support terminal states</li>
-				<li>terminal state checking controllable through <code>MachineCoreBuilder</code></li>
-				<li>introduced new event handling modes for <code>StateMachine</code>:
-					<ul>
-						<li><em>priority mode</em> (default) processes internal
-							events before external</li>
-						<li><em>normal mode</em> enqueues internal processes in the
-							main event queue</li>
-					</ul>
-				</li>
-				<li>improved documentation</li>
-			</ul>
-
-			<!-- Version 0.0.4 -->
-			<h3>
-				0.0.4 <a class="badge" href="0.0.4">javadoc</a> <a class="badge" href="https://github.com/ksmonkey123/awaeUtils/releases/tag/0.0.4">release</a>
-
-			</h3>
-			<ul>
-				<li>created <code>ch.awae.utils.statemachine</code> package for
-					creating asynchronous state machine clusters:
-					<ul>
-						<li>use <code>MachineCoreBuilder</code> to create state
-							machine cores
-						</li>
-						<li>use <code>StateMachineBuilder</code> to create state
-							machine clusters
-						</li>
-					</ul>
-				</li>
-			</ul>
-
-			<!-- Version 0.0.2 -->
-			<h3>
-				0.0.2 <a class="badge" href="0.0.2">javadoc</a>
-			</h3>
-			<ul>
-				<li>added MIT license file</li>
-				<li>documented <code>Trampoline</code> class
-				</li>
-			</ul>
-
-			<!-- Version 0.0.2 -->
-			<h3>
-				0.0.1 <a class="badge" href="https://github.com/ksmonkey123/awaeUtils/releases/tag/0.0.1">release</a>
-			</h3>
-			initial release
+## Version 0.0.2
+- added MIT license file
+- documented <code>Trampoline</code> class
+ 
+## Version 0.0.1
+- initial release
