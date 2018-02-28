@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## Version 1.0.1 (work in progress)
+- Added more functional types:
+ - Additional Tuple types (`T3`, `T4`)
+ - Additional Function Types (`Function0` - `Function4`)
+ - Additional Failable Functions (`FailableFunction0` - `FailableFunction4`)
+- Added an immutable `List` implementation similar to the Scala `List` built as a single linked stack with immutable elements
+- Made all Tuple types `Serializable`
+- Added `serial` package containing interface for different serialization schemes. These interfaces explicitly declare the methods required for customized Java serialization:
+ - `CustomDeserialization` for objects requiring a `readObject` method
+ - `CustomSerialization` for objects requiring a `writeObject` and a `readObject` method
+ - `SerializedThroughProxy` for objects that are serialized as another (proxy) object provided by a `writeReplace` method
+ - `SerializationProxy` for objects that serve as proxy objects in serialization and are resolved through a `readResolve` method
+
 ## Version 1.0.0
 - Migrated various utilities from other projects. These include:
  - Several functional types such as <code>Try</code>, <code>Result</code>,
