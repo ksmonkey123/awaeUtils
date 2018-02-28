@@ -1,6 +1,7 @@
 package ch.awae.utils.collection.immutable;
 
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -204,6 +205,7 @@ public class List<T> implements Iterable<T>, Serializable {
             if (!first)
                 sb.append(',');
             sb.append(elem.toString());
+            first = false;
         }
         sb.append(')');
         return sb.toString();
@@ -247,6 +249,24 @@ public class List<T> implements Iterable<T>, Serializable {
                 }
             }
         };
+    }
+
+    public Object[] toArray() {
+        Object[] array = new Object[size()];
+        int index = 0;
+        for (Object elem : this)
+            array[index++] = elem;
+        return array;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <Type> Type[] toArray(Type[] a) {
+        if (a.length < this.size)
+            a = (Type[]) Array.newInstance(a.getClass().getComponentType(), size);
+        int index = 0;
+        for (T elem : this)
+            a[index++] = (Type) elem;
+        return a;
     }
 
 }
