@@ -1,30 +1,20 @@
 # CHANGELOG
 
 ## 1.0.0
- - Migrated various utilities from other projects. These include:
-   - Several functional types such as <code>Try</code>, <code>Result</code>,
+- Migrated various utilities from other projects. These include:
+ - Several functional types such as <code>Try</code>, <code>Result</code>,
 							<code>FailableFunction0</code>, <code>FailableFunction1</code>
 							and <code>T2</code> (a 2-tuple)
-							
-						<li>XML processing similar to X-Path</li>
-						<li><code>IterativeRunner</code>: A runnable that evaluates
-							the same code block in an infinite loop that can be terminated by
-							the code block itself or by interrupting the thread running the <code>Runnable</code>.</li>
-						<li>a <code>Source</code> system simplifying and unifying
+ - XML processing similar to X-Path
+ - <code>IterativeRunner</code>: A runnable that evaluates the same code block in an infinite loop that can be terminated by
+							the code block itself or by interrupting the thread running the <code>Runnable</code>.
+ - a <code>Source</code> system simplifying and unifying
 							reading data from files, streams or a URL
-						</li>
-						<li>a <code>PriorityQueue</code> using numeric priority
-							parameters instead of natural ordering of the elements.
-						</li>
-						<li>a wrapper class for <code>Lazy</code> instantiation
-						</li>
-						<li>a <code>Shutdown</code> handler interacting with Java
+ - a <code>PriorityQueue</code> using numeric priority parameters instead of natural ordering of the elements.
+ - a wrapper class for <code>Lazy</code> instantiation
+ - a <code>Shutdown</code> handler interacting with Java
 							shutdown hooks that allows the definition of a specific shutdown
 							sequence for shutdown hooks.
-						</li>
-					</ul>
-				</li>
-			</ul>
 
 			<!-- Version 0.0.6 -->
 			<h3>0.0.6</h3>
