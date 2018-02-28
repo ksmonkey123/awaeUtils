@@ -6,6 +6,7 @@
  - Additional Function Types (`Function0` - `Function4`)
  - Additional Failable Functions (`FailableFunction0` - `FailableFunction4`)
 - Added an immutable `List` implementation similar to the Scala `List` built as a single linked stack with immutable elements
+- Added `Callable` as a super-type of `FailableFunctio0` to allow for seamless integration with `ExecutorServices`	
 - Made all Tuple types `Serializable`
 - Added `serial` package containing interface for different serialization schemes. These interfaces explicitly declare the methods required for customized Java serialization:
  - `CustomDeserialization` for objects requiring a `readObject` method

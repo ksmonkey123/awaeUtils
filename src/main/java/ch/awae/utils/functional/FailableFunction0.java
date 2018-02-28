@@ -14,6 +14,10 @@ public interface FailableFunction0<T> extends Callable<T> {
 
     T apply() throws Throwable;
 
+    default <S> FailableFunction0<S> andThen(FailableFunction1<T, S> f) {
+        return () -> f.apply(apply());
+    }
+
     @Override
     default T call() throws Exception {
         try {
