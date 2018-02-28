@@ -1,14 +1,11 @@
-<h3>
-				1.0.0 <a class="badge" href="1.0.0">javadoc</a> <a class="badge" href="https://github.com/ksmonkey123/awaeUtils/releases/tag/1.0.0">release</a>
-			</h3>
-			<ul>
-				<li>Migrated various utilities from other projects. These
-					include:
-					<ul>
-						<li>Several functional types such as <code>Try</code>, <code>Result</code>,
+# CHANGELOG
+
+## 1.0.0
+ - Migrated various utilities from other projects. These include:
+   - Several functional types such as <code>Try</code>, <code>Result</code>,
 							<code>FailableFunction0</code>, <code>FailableFunction1</code>
 							and <code>T2</code> (a 2-tuple)
-						</li>
+							
 						<li>XML processing similar to X-Path</li>
 						<li><code>IterativeRunner</code>: A runnable that evaluates
 							the same code block in an infinite loop that can be terminated by
