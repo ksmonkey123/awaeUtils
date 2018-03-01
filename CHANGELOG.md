@@ -4,7 +4,10 @@
 - Added more functional types:
  - Additional Tuple types (`T3`, `T4`)
  - Additional Function Types (`Function0` - `Function4`)
- - Additional Failable Functions (`FailableFunction0` - `FailableFunction4`)
+ - Added Function chaining to all function types
+ - Added Function currying and partial application
+ - Integrated Failable Functions with *normal* Functions for better interoperation (`FailableFunction0` & `FailableFunction1`)
+ - Removed `FailableRunnable`
 - Added an immutable `List` implementation similar to the Scala `List` built as a single linked stack with immutable elements
 - Added `Callable` as a super-type of `FailableFunctio0` to allow for seamless integration with `ExecutorServices`	
 - Made all Tuple types `Serializable`
@@ -12,7 +15,7 @@
  - `CustomDeserialization` for objects requiring a `readObject` method
  - `CustomSerialization` for objects requiring a `writeObject` and a `readObject` method
  - `SerializedThroughProxy` for objects that are serialized as another (proxy) object provided by a `writeReplace` method
- - `SerializationProxy` for objects that serve as proxy objects in serialization and are resolved through a `readResolve` method
+ - `SerializationProxy` for objects that serve as proxy objects in serialization and are resolved through a `readResolve` method. If a class serves as its own proxy (i.e. after normal serialization the object will be replaced when deserializing it), the class can implement `SerializationProxy` itself. There is no need to use a distinct proxy object.
 
 ## Version 1.0.0
 - Migrated various utilities from other projects. These include:
