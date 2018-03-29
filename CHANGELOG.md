@@ -1,6 +1,9 @@
 # CHANGELOG
 
-## Version 1.0.1 (work in progress)
+## Version 1.0.2
+- Added `AccessFlag`. This class encapsulates an access flag that can be updated at any time. This flag can be tested at any time using the methods `test`, `testAndLock` or `lockWhile`. All calls to this method yield an exception if the `AccessFlag` is locked. This allows simple and thread-safe deactivation of certain functionality at runtime.
+
+## Version 1.0.1
 - Added more functional types:
  - Additional Tuple types (`T3`, `T4`)
  - Additional Function Types (`Function0` - `Function4`)
@@ -9,7 +12,7 @@
  - Integrated Failable Functions with *normal* Functions for better interoperation (`FailableFunction0` & `FailableFunction1`)
  - Removed `FailableRunnable`
 - Added an immutable `List` implementation similar to the Scala `List` built as a single linked stack with immutable elements
-- Added `Callable` as a super-type of `FailableFunctio0` to allow for seamless integration with `ExecutorServices`	
+- Added `Callable` as a super-type of `FailableFunctio0` to allow for seamless integration with `ExecutorServices`
 - Made all Tuple types `Serializable`
 - Added `serial` package containing interface for different serialization schemes. These interfaces explicitly declare the methods required for customized Java serialization:
  - `CustomDeserialization` for objects requiring a `readObject` method
@@ -72,6 +75,6 @@
 ## Version 0.0.2
 - added MIT license file
 - documented <code>Trampoline</code> class
- 
+
 ## Version 0.0.1
 - initial release
