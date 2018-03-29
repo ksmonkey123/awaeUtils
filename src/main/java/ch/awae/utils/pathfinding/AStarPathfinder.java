@@ -9,24 +9,29 @@ import java.util.Objects;
 import ch.awae.utils.collection.mutable.PriorityQueue;
 
 /**
- * Pathfinder based on the Dijkstra algorithm.
+ * Path Finder based on the A-Star algorithm.
  * 
- * This algorithm requires the vertices to provide an equals-equivalent hash
- * function, i.e. a hash function where equality of the hash implies actual
- * object equality
+ * This algorithm uses the Cartesian distance between the spatial position of
+ * vertices as a distance heuristic. This Cartesian distance supports any
+ * arbitrary number of dimensions. If not all vertices provide spatial positions
+ * of the same dimension the smaller <em>vector</em> is internally expanded to
+ * match the larger one. This expansion implies 0-values for all missing
+ * dimensions.
  * 
  * @author Andreas Wälchli
- * @since awaeUtils 1.0.0
+ * @since awaeUtils 1.0.2
  *
  * @param <V>
- *            the vertex type of the pathfinder
+ *            the vertex type of the path finder
  */
-public final class DijkstraPathfinder<V extends Vertex<V>> implements Pathfinder<V> {
+public final class AStarPathfinder<V extends Vertex<V>> implements Pathfinder<V> {
 
     @Override
     public List<V> findPath(V from, V to) {
         Objects.requireNonNull(from);
         Objects.requireNonNull(to);
+
+        double[] targetPosition = to.getSpatialPosition();
 
         Map<V, Double> distances = new HashMap<>();
         Map<V, V> backsteps = new HashMap<>();
@@ -46,7 +51,7 @@ public final class DijkstraPathfinder<V extends Vertex<V>> implements Pathfinder
                     backsteps.put(neighbour, vertex);
                     if (queue.contains(neighbour))
                         queue.remove(neighbour);
-                    queue.add(neighbour, dist);
+                    queue.add(neighbour, dist + getHeuristics(from.getSpatialPosition(), targetPosition));
                 }
             }
         }
@@ -62,6 +67,18 @@ public final class DijkstraPathfinder<V extends Vertex<V>> implements Pathfinder
 
         return step == null ? null : route;
 
+    }
+
+    private double getHeuristics(double[] from, double[] to) {
+        int fromLength = from.length;
+        int toLength = to.length;
+        int longest = Math.max(fromLength, toLength);
+        double acc = 0.0;
+        for (int i = 0; i < longest; i++) {
+            double delta = (i < fromLength ? from[i] : 0) - (i < toLength ? to[i] : 0);
+            acc += delta * delta;
+        }
+        return Math.sqrt(acc);
     }
 
 }

@@ -2,6 +2,11 @@
 
 ## Version 1.0.2
 - Added `AccessFlag`. This class encapsulates an access flag that can be updated at any time. This flag can be tested at any time using the methods `test`, `testAndLock` or `lockWhile`. All calls to this method yield an exception if the `AccessFlag` is locked. This allows simple and thread-safe deactivation of certain functionality at runtime.
+- Added more package objects and improved documentation
+- Pathfinding improvements:
+ - Vertices may now provide n-dimensional spatial coordinates to be used as a heuristic
+ - Added an implementation of the A-Star algorithm
+ - Fixed Dijkstra path finder
 
 ## Version 1.0.1
 - Added more functional types:
