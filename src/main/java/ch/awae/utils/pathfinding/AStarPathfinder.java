@@ -24,14 +24,22 @@ import ch.awae.utils.collection.mutable.PriorityQueue;
  * @param <V>
  *            the vertex type of the path finder
  */
-public final class AStarPathfinder<V extends Vertex<V>> implements Pathfinder<V> {
+public final class AStarPathfinder<V> implements Pathfinder<V> {
+
+    private GraphDataProvider<V> graph;
+
+    public AStarPathfinder(GraphDataProvider<V> graph) {
+        this.graph = graph;
+    }
+
+    public static <T> AStarPathfinder<T> create(GraphDataProvider<T> graph) {
+        return new AStarPathfinder<>(graph);
+    }
 
     @Override
     public List<V> findPath(V from, V to) {
         Objects.requireNonNull(from);
         Objects.requireNonNull(to);
-
-        double[] targetPosition = to.getSpatialPosition();
 
         Map<V, Double> distances = new HashMap<>();
         Map<V, V> backsteps = new HashMap<>();
@@ -43,15 +51,17 @@ public final class AStarPathfinder<V extends Vertex<V>> implements Pathfinder<V>
         // build global map
         while (!queue.isEmpty()) {
             V vertex = queue.remove();
+            if (vertex.equals(to))
+                break;
             double distance = distances.get(vertex);
-            for (V neighbour : vertex.getNeighbours()) {
-                double dist = distance + vertex.getDistance(neighbour);
+            for (V neighbour : graph.getNeighbours(vertex)) {
+                double dist = distance + graph.getDistance(vertex, neighbour);
                 if (!distances.containsKey(neighbour) || distances.get(neighbour) > dist) {
                     distances.put(neighbour, dist);
                     backsteps.put(neighbour, vertex);
                     if (queue.contains(neighbour))
                         queue.remove(neighbour);
-                    queue.add(neighbour, dist + getHeuristics(from.getSpatialPosition(), targetPosition));
+                    queue.add(neighbour, dist + graph.getHeuristicDistance(neighbour, to));
                 }
             }
         }
@@ -67,18 +77,6 @@ public final class AStarPathfinder<V extends Vertex<V>> implements Pathfinder<V>
 
         return step == null ? null : route;
 
-    }
-
-    private double getHeuristics(double[] from, double[] to) {
-        int fromLength = from.length;
-        int toLength = to.length;
-        int longest = Math.max(fromLength, toLength);
-        double acc = 0.0;
-        for (int i = 0; i < longest; i++) {
-            double delta = (i < fromLength ? from[i] : 0) - (i < toLength ? to[i] : 0);
-            acc += delta * delta;
-        }
-        return Math.sqrt(acc);
     }
 
 }

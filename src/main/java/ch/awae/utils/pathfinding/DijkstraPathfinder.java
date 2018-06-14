@@ -1,12 +1,6 @@
 package ch.awae.utils.pathfinding;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
-import ch.awae.utils.collection.mutable.PriorityQueue;
 
 /**
  * Pathfinder based on the Dijkstra algorithm.
@@ -21,47 +15,21 @@ import ch.awae.utils.collection.mutable.PriorityQueue;
  * @param <V>
  *            the vertex type of the pathfinder
  */
-public final class DijkstraPathfinder<V extends Vertex<V>> implements Pathfinder<V> {
+public final class DijkstraPathfinder<V> implements Pathfinder<V> {
+
+    private AStarPathfinder<V> backer;
+
+    public DijkstraPathfinder(GraphDataProvider<V> graph) {
+        backer = new AStarPathfinder<>(graph.withHeuristic((a, b) -> 0.0));
+    }
+
+    public static <T> DijkstraPathfinder<T> create(GraphDataProvider<T> graph) {
+        return new DijkstraPathfinder<>(graph);
+    }
 
     @Override
     public List<V> findPath(V from, V to) {
-        Objects.requireNonNull(from);
-        Objects.requireNonNull(to);
-
-        Map<V, Double> distances = new HashMap<>();
-        Map<V, V> backsteps = new HashMap<>();
-        PriorityQueue<V> queue = PriorityQueue.minQueue();
-
-        distances.put(from, Double.valueOf(0.0));
-        queue.add(from, 0);
-
-        // build global map
-        while (!queue.isEmpty()) {
-            V vertex = queue.remove();
-            double distance = distances.get(vertex);
-            for (V neighbour : vertex.getNeighbours()) {
-                double dist = distance + vertex.getDistance(neighbour);
-                if (!distances.containsKey(neighbour) || distances.get(neighbour) > dist) {
-                    distances.put(neighbour, dist);
-                    backsteps.put(neighbour, vertex);
-                    if (queue.contains(neighbour))
-                        queue.remove(neighbour);
-                    queue.add(neighbour, dist);
-                }
-            }
-        }
-
-        // extract path
-        List<V> route = new ArrayList<>();
-
-        V step = to;
-        while (step != null && !step.equals(from)) {
-            route.add(step);
-            step = backsteps.get(step);
-        }
-
-        return step == null ? null : route;
-
+        return backer.findPath(from, to);
     }
 
 }

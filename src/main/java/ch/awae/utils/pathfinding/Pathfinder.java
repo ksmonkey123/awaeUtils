@@ -11,7 +11,7 @@ import java.util.List;
  * @param <V>
  *            the vertex type supported by the pathfinder
  */
-public interface Pathfinder<V extends Vertex<V>> {
+public interface Pathfinder<V> {
 
 	/**
 	 * Finds a path for the given starting point and the given destination

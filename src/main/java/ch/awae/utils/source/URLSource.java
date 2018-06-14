@@ -8,25 +8,25 @@ import ch.awae.utils.functional.Result;
 
 final class URLSource extends Source {
 
-	private final String url;
+    private final String url;
 
-	URLSource(String url) {
-		this.url = url;
-	}
+    URLSource(String url) {
+        this.url = url;
+    }
 
-	@Override
-	public Result<InputStream> mkStream() {
-		return Result.of(this.url).map(URL::new).map(URL::openStream);
-	}
+    @Override
+    public Result<InputStream> mkStream() {
+        return Result.of(this.url).map(URL::new).map(URL::openStream);
+    }
 
-	@Override
-	public String toString() {
-		return "URL Source ( " + this.url + " )";
-	}
-	
-	@Override
-	public void close() throws IOException {
-	    // no close required
-	}
+    @Override
+    public String toString() {
+        return "URL Source ( " + this.url + " )";
+    }
+
+    @Override
+    public void close() throws IOException {
+        // no close required
+    }
 
 }
