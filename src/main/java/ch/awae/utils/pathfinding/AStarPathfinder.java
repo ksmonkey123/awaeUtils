@@ -27,6 +27,7 @@ import ch.awae.utils.collection.mutable.PriorityQueue;
 public final class AStarPathfinder<V> implements Pathfinder<V> {
 
     private GraphDataProvider<V> graph;
+    private long timeout = -1;
 
     public AStarPathfinder(GraphDataProvider<V> graph) {
         this.graph = graph;
@@ -35,9 +36,18 @@ public final class AStarPathfinder<V> implements Pathfinder<V> {
     public static <T> AStarPathfinder<T> create(GraphDataProvider<T> graph) {
         return new AStarPathfinder<>(graph);
     }
+    
+    public void setTimeout(long timeout) {
+        this.timeout = timeout;
+    }
+    
+    public long getTimeout() {
+        return timeout;
+    }
 
     @Override
     public List<V> findPath(V from, V to) {
+        long start = System.currentTimeMillis();
         Objects.requireNonNull(from);
         Objects.requireNonNull(to);
 
@@ -50,6 +60,8 @@ public final class AStarPathfinder<V> implements Pathfinder<V> {
 
         // build global map
         while (!queue.isEmpty()) {
+            if (System.currentTimeMillis() > (start + timeout))
+                return null;
             V vertex = queue.remove();
             if (vertex.equals(to))
                 break;
