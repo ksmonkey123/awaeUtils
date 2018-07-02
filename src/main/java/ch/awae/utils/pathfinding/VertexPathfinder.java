@@ -46,4 +46,14 @@ public class VertexPathfinder<T extends Vertex<T>> implements Pathfinder<T> {
         return Math.sqrt(acc);
     }
 
+    @Override
+    public void setTimeout(long timeout) {
+        backer.setTimeout(timeout);
+    }
+
+    @Override
+    public long getTimeout() {
+        return backer.getTimeout();
+    }
+
 }

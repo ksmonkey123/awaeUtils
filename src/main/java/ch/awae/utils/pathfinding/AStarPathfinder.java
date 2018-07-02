@@ -27,7 +27,7 @@ import ch.awae.utils.collection.mutable.PriorityQueue;
 public final class AStarPathfinder<V> implements Pathfinder<V> {
 
     private GraphDataProvider<V> graph;
-    private long timeout = -1;
+    private long timeout = 0;
 
     public AStarPathfinder(GraphDataProvider<V> graph) {
         this.graph = graph;
@@ -37,10 +37,12 @@ public final class AStarPathfinder<V> implements Pathfinder<V> {
         return new AStarPathfinder<>(graph);
     }
     
+    @Override
     public void setTimeout(long timeout) {
         this.timeout = timeout;
     }
     
+    @Override
     public long getTimeout() {
         return timeout;
     }
@@ -60,7 +62,7 @@ public final class AStarPathfinder<V> implements Pathfinder<V> {
 
         // build global map
         while (!queue.isEmpty()) {
-            if (System.currentTimeMillis() > (start + timeout))
+            if (timeout > 0 && System.currentTimeMillis() > (start + timeout))
                 return null;
             V vertex = queue.remove();
             if (vertex.equals(to))

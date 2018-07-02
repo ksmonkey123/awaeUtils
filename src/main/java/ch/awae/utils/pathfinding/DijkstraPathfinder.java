@@ -31,5 +31,15 @@ public final class DijkstraPathfinder<V> implements Pathfinder<V> {
     public List<V> findPath(V from, V to) {
         return backer.findPath(from, to);
     }
+    
+    @Override
+    public long getTimeout() {
+        return backer.getTimeout();
+    }
+    
+    @Override
+    public void setTimeout(long timeout) {
+        backer.setTimeout(timeout);
+    }
 
 }
