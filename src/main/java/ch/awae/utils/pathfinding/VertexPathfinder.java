@@ -1,7 +1,5 @@
 package ch.awae.utils.pathfinding;
 
-import java.util.List;
-
 import ch.awae.utils.functional.Function1;
 
 public class VertexPathfinder<T extends Vertex<T>> implements Pathfinder<T> {
@@ -30,8 +28,8 @@ public class VertexPathfinder<T extends Vertex<T>> implements Pathfinder<T> {
     }
 
     @Override
-    public List<T> findPath(T from, T to) {
-        return backer.findPath(from, to);
+    public PathfindingResult<T> execute(T from, T to) {
+        return backer.execute(from, to);
     }
 
     private double getHeuristics(double[] from, double[] to) {

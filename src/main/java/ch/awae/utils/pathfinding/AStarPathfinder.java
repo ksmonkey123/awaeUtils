@@ -11,13 +11,6 @@ import ch.awae.utils.collection.mutable.PriorityQueue;
 /**
  * Path Finder based on the A-Star algorithm.
  * 
- * This algorithm uses the Cartesian distance between the spatial position of
- * vertices as a distance heuristic. This Cartesian distance supports any
- * arbitrary number of dimensions. If not all vertices provide spatial positions
- * of the same dimension the smaller <em>vector</em> is internally expanded to
- * match the larger one. This expansion implies 0-values for all missing
- * dimensions.
- * 
  * @author Andreas Wälchli
  * @since awaeUtils 1.0.2
  *
@@ -36,20 +29,21 @@ public final class AStarPathfinder<V> implements Pathfinder<V> {
     public static <T> AStarPathfinder<T> create(GraphDataProvider<T> graph) {
         return new AStarPathfinder<>(graph);
     }
-    
+
     @Override
     public void setTimeout(long timeout) {
         this.timeout = timeout;
     }
-    
+
     @Override
     public long getTimeout() {
         return timeout;
     }
 
     @Override
-    public List<V> findPath(V from, V to) {
+    public PathfindingResult<V> execute(V from, V to) {
         long start = System.currentTimeMillis();
+        long steps = 0;
         Objects.requireNonNull(from);
         Objects.requireNonNull(to);
 
@@ -63,7 +57,8 @@ public final class AStarPathfinder<V> implements Pathfinder<V> {
         // build global map
         while (!queue.isEmpty()) {
             if (timeout > 0 && System.currentTimeMillis() > (start + timeout))
-                return null;
+                return PathfindingResult.timeout(System.currentTimeMillis() - start, steps);
+            steps++;
             V vertex = queue.remove();
             if (vertex.equals(to))
                 break;
@@ -89,7 +84,9 @@ public final class AStarPathfinder<V> implements Pathfinder<V> {
             step = backsteps.get(step);
         }
 
-        return step == null ? null : route;
+        return step == null //
+                ? PathfindingResult.failure(System.currentTimeMillis() - start, steps)
+                : PathfindingResult.success(System.currentTimeMillis() - start, steps, route);
 
     }
 

@@ -1,19 +1,17 @@
 package ch.awae.utils.pathfinding;
 
-import java.util.List;
-
 /**
  * Pathfinder based on the Dijkstra algorithm.
  * 
- * This algorithm requires the vertices to provide an equals-equivalent hash
- * function, i.e. a hash function where equality of the hash implies actual
- * object equality
+ * This algorithm is based of the A-Star algorithm and uses a fixed distance
+ * heuristic of {@code 0}.
  * 
  * @author Andreas Wälchli
  * @since awaeUtils 1.0.0
  *
  * @param <V>
  *            the vertex type of the pathfinder
+ * @see AStarPathfinder
  */
 public final class DijkstraPathfinder<V> implements Pathfinder<V> {
 
@@ -28,15 +26,15 @@ public final class DijkstraPathfinder<V> implements Pathfinder<V> {
     }
 
     @Override
-    public List<V> findPath(V from, V to) {
-        return backer.findPath(from, to);
+    public PathfindingResult<V> execute(V from, V to) {
+        return backer.execute(from, to);
     }
-    
+
     @Override
     public long getTimeout() {
         return backer.getTimeout();
     }
-    
+
     @Override
     public void setTimeout(long timeout) {
         backer.setTimeout(timeout);

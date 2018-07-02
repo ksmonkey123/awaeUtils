@@ -22,7 +22,11 @@ public interface Pathfinder<V> {
      *            the destination vertex
      * @return an ordered list containing the path
      */
-    List<V> findPath(V from, V to);
+    default List<V> findPath(V from, V to) {
+        return execute(from, to).getPath();
+    }
+
+    PathfindingResult<V> execute(V from, V to);
 
     /**
      * set a timeout for the pathfinding.

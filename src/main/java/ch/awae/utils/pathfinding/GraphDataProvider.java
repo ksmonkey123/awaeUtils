@@ -29,6 +29,9 @@ public interface GraphDataProvider<T> {
         return getDistance(from, to);
     }
 
+    /**
+     * Replaces the distance heuristic with a custom function.
+     */
     default GraphDataProvider<T> withHeuristic(Function2<T, T, Double> heuristic) {
         GraphDataProvider<T> self = this;
         return new GraphDataProvider<T>() {
@@ -46,6 +49,31 @@ public interface GraphDataProvider<T> {
             @Override
             public double getHeuristicDistance(T from, T to) {
                 return heuristic.apply(from, to);
+            }
+
+        };
+    }
+
+    /**
+     * Replaces the distance function with a custom function.
+     */
+    default GraphDataProvider<T> withDistance(Function2<T, T, Double> distance) {
+        GraphDataProvider<T> self = this;
+        return new GraphDataProvider<T>() {
+
+            @Override
+            public Iterable<T> getNeighbours(T vertex) {
+                return self.getNeighbours(vertex);
+            }
+
+            @Override
+            public double getDistance(T from, T to) {
+                return distance.apply(from, to);
+            }
+
+            @Override
+            public double getHeuristicDistance(T from, T to) {
+                return self.getHeuristicDistance(from, to);
             }
 
         };
