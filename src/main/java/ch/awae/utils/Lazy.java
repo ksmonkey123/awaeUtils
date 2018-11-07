@@ -18,7 +18,7 @@ import java.util.function.Supplier;
  */
 public final class Lazy<T> {
 
-    private boolean needsInit = false;
+    private boolean needsInit = true;
     private T value;
     private final Supplier<? extends T> supplier;
     private final Object LOCKER = new Object();
